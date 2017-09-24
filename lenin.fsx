@@ -99,20 +99,41 @@ let trigger = ["ты"; "python"; "блядь";
                "сперма"; "зига"; "тимка";
                "сосёт"; "сосет"; "генту";
                "слака"; "ЛОР"; "овцы";
-               "мамбет"; "#"]
+               "мамбет"; "#"; "геи";
+               "гей"; "пидор"; "пидорас"]
 
-let lenin msg =
+let lenin msg channel =
     match msg with
-    | Some({ command = "PRIVMSG"; text = Some(text)}) ->
+    | Some({nick = "awesomelackware"},
+           { command = "PRIVMSG"; text = Some("!die")}) ->
+        Some { command = "QUIT"; subject = None; text = None }
+    | Some(_, { command = "PRIVMSG"; text = Some(text)}) ->
         match text with
         | Prefix "!version" _ ->
-            Some (sprintf "I on %A" Environment.Version)
-        | Prefix "!date" _ -> Some (sprintf "%A" System.DateTime.Now)
-        | Prefix "!help" _ -> Some "Google it!"
-        | Prefix "!echo" rest -> Some rest
-        | Prefix nick _ -> Some (degenerate ())
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some (sprintf "I on %A" Environment.Version) }
+        | Prefix "!date" _ ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some (sprintf "%A" System.DateTime.Now) }
+        | Prefix "!help" _ ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some "Google it!" }
+        | Prefix "!echo" rest ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some rest }
+        | Prefix nick _ ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some (degenerate ()) }
         | s when (List.map s.Contains trigger
-                  |> List.exists ((=) true)) -> Some (degenerate ())
+                  |> List.exists ((=) true)) ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some (degenerate ()) }
         | _ -> None
     | None | Some(_) -> None
 

@@ -12,30 +12,51 @@ let (|Prefix|_|) (p : string) (s : string) =
     else
         None
 
-let test msg =
+let test msg channel =
     match msg with
-    | Some({ command = "PRIVMSG"; text = Some(text)}) ->
+    | Some(_, { command = "PRIVMSG"; text = Some(text)}) ->
         match text with
         | Prefix "!version" rest ->
-            Some (sprintf "I on %A" Environment.Version)
-        | Prefix "!date" rest -> Some (sprintf "%A" System.DateTime.Now)
-        | Prefix "!help" rest -> Some "Google it!"
-        | Prefix "!echo" rest -> Some rest
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some (sprintf "I on %A" Environment.Version) }
+        | Prefix "!date" rest ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some (sprintf "%A" System.DateTime.Now) }
+        | Prefix "!help" rest ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some "Google it!" }
+        | Prefix "!echo" rest ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some rest }
         | Prefix "!sosnool" rest ->
-            if List.contains (rest.ToLower()) ["awesomelackware"] then
-                Some "NIET."
-            elif List.contains (rest.ToLower()) ["timdorohin"] then
-                Some "Несколько раз."
-            else
-                Some "Да."
-        | s when s.Contains "ЖМУ/Пинус" -> Some "Жми лучше!"
-        | s when s.Contains " - " -> Some "Сдохни, тварь!"
+            let result =
+                if List.contains (rest.ToLower()) ["awesomelackware"] then
+                    Some "NIET."
+                elif List.contains (rest.ToLower()) ["timdorohin"] then
+                    Some "Несколько раз."
+                else
+                    Some "Да."
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = result }
+        | s when s.Contains "ЖМУ/Пинус" ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some "Жми лучше!" }
+        | s when s.Contains " - " ->
+            Some { command = "PRIVMSG";
+                   subject = Some channel;
+                   text = Some "Сдохни, тварь!" }
         | _ -> None
     | None | Some(_) -> None
 
 let server = "chat.freenode.net"
 let port = 6667
-let channel = "#lor-minetest"
+let channel = "#lor"
 let nick = "pidor-2"
 
 let funcs = [test]

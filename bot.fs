@@ -6,11 +6,14 @@ open System.Net
 open System.Net.Sockets
 open System.Text.RegularExpressions
 
-type Message = { nick : string;
-                 ident : string;
-                 command : string;
-                 subject : string;
+type Person = { nick : string;
+                ident : string}
+
+type Message = { command : string;
+                 subject : string option;
                  text : string option }
+
+type VesitorMessage = Person * Message
 
 let private ircPing (writer : StreamWriter) server =
     writer.WriteLine(sprintf "PONG %s\n" server)
@@ -28,15 +31,28 @@ let private ircParseMsg (line : string) =
     if matches.Success then
         let values = List.tail [ for g in matches.Groups -> g.Value ]
         let text = values.[4]
-        Some ({ nick = values.[0];
-                ident = values.[1];
-                command = values.[2];
-                subject = values.[3];
-                text = if System.String.IsNullOrEmpty text
-                       then None
-                       else Some(text)})
+        Some (({ nick = values.[0];
+                 ident = values.[1] },
+               { command = values.[2];
+                 subject = Some values.[3];
+                 text = if System.String.IsNullOrEmpty text
+                        then None
+                        else Some(text)}))
     else
         None
+
+let private messageToString { command = command;
+                              subject = subjectOpt;
+                              text = textOpt} =
+
+    let nullOrSubj = function
+    | Some(a) -> a + " "
+    | None -> ""
+    
+    let subject = nullOrSubj subjectOpt
+    let text = nullOrSubj textOpt
+
+    sprintf "%s %s:%s" command subject text
 
 type public IrcBot(server : string, port, channel, nick, funcs) =
     member this.server = server
@@ -66,8 +82,16 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
             if line.Contains "PING" then
                 ircPing ircWriter this.server
     
-            List.map (fun x -> x msg) funcs
+            List.map (fun x -> x msg channel) funcs
+            |> List.map (fun x ->
+                         match x with
+                         | Some(s) -> Some (messageToString s)
+                         | None -> None)
             |> List.iter (fun x ->
                           match x with
-                          | Some(s) -> ircPrivmsg ircWriter this.channel s
+                          | Some(s) -> ircWriter.WriteLine(s)
                           | None -> ())
+            //|> List.iter (fun x ->
+            //              match x with
+            //              | Some(s) -> ircPrivmsg ircWriter this.channel s
+            //              | None -> ())
