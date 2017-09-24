@@ -33,7 +33,6 @@ let test msg =
         | _ -> None
     | None | Some(_) -> None
 
-
 let server = "chat.freenode.net"
 let port = 6667
 let channel = "#lor-minetest"
