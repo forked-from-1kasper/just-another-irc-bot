@@ -10,21 +10,21 @@ let port = 6667
 let channel = "#lor"
 let nick = "Poehavshy"
 
-let lines =
-    use sr = new StreamReader ("megav2.txt")
-
-    let rec support buf =
-        if sr.EndOfStream then buf
-        else
-            if String.IsNullOrEmpty buf then
-                support (sr.ReadLine ())
-            else
-                support (buf + " " + sr.ReadLine ())
-
-    support ""
+//let lines =
+//    use sr = new StreamReader ("megav2.txt")
+//
+//    let rec support buf =
+//        if sr.EndOfStream then buf
+//        else
+//            if String.IsNullOrEmpty buf then
+//                support (sr.ReadLine ())
+//            else
+//                support (buf + " " + sr.ReadLine ())
+//
+//    support ""
 
 let makeOrAdd key elem (map : Map<_, _>) =
-    if map.ContainsKey key then
+    if map.ContainsKey key thens
         Map.add key (List.append elem map.[key]) map
     else
         Map.add key elem map
@@ -50,16 +50,18 @@ let megahitlersplit (str : string) =
     |> Array.map Seq.ofArray
     |> Array.map (String.concat " ")
 
-let wordsMap =
-    lines
-    |> fun x -> x.Split([| ". " |], StringSplitOptions.None)
-    //|> Array.map (fun elem -> elem.Split([| ' ' |]))
-    |> Array.map megahitlersplit
-    |> Array.map (fun elem -> Array.append [| "*START*" |] elem
-                              |> fun x -> Array.append x [| "*END*" |])
-    |> Array.map DasIstMagic
-    |> Array.map (fun (_, b) -> b)
-    |> fun x -> Array.fold mergeMap (Array.head x) (Array.tail x)
+let mutable wordsMap =
+    [("*START*", ["Да"]);
+     ("Да", ["*END*"])] |> Map.ofList
+//    lines
+//    |> fun x -> x.Split([| ". " |], StringSplitOptions.None)
+//    //|> Array.map (fun elem -> elem.Split([| ' ' |]))
+//    |> Array.map megahitlersplit
+//    |> Array.map (fun elem -> Array.append [| "*START*" |] elem
+//                              |> fun x -> Array.append x [| "*END*" |])
+//    |> Array.map DasIstMagic
+//    |> Array.map (fun (_, b) -> b)
+//    |> fun x -> Array.fold mergeMap (Array.head x) (Array.tail x)
 
 let makeShiz (map : Map<_, _>) =
     let rec support acc current =
@@ -137,6 +139,27 @@ let lenin msg channel =
         | _ -> None
     | None | Some(_) -> None
 
-let funcs = [lenin]
+let learn msg channel =
+    match msg with
+    | Some(_, { command = "PRIVMSG"; text = Some(text)}) ->
+        if text.Contains nick then None
+        else
+            let newKey =
+                text
+                |> (fun s -> if s.EndsWith "." ||
+                                s.EndsWith "?" ||
+                                s.EndsWith "!" then s.Remove (s.Length - 1)
+                             else s)
+                |> megahitlersplit
+                |> (fun elem -> Array.append [| "*START*" |] elem
+                                |> fun x -> Array.append x [| "*END*" |])
+                |> DasIstMagic
+                |> fun (_, b) -> b
+    
+            wordsMap <- mergeMap wordsMap newKey
+            None
+    | _ -> None
+
+let funcs = [lenin; learn]
 let myBot = new IrcBot(server, port, channel, nick, funcs)
 myBot.loop ()
