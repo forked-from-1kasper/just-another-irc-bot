@@ -14,43 +14,43 @@ let (|Prefix|_|) (p : string) (s : string) =
 
 let test msg channel =
     match msg with
-    | Some(_, { command = "PRIVMSG"; text = Some(text)}) ->
+    | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
         match text with
         | Prefix "!version" rest ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some (sprintf "I on %A" Environment.Version) }
+                   args = [ channel;
+                            sprintf ":I on %A" Environment.Version ] }
         | Prefix "!date" rest ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some (sprintf "%A" System.DateTime.Now) }
+                   args = [ channel;
+                            sprintf ":%A" System.DateTime.Now ] }
         | Prefix "!help" rest ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some "Google it!" }
+                   args = [ channel;
+                            ":Google it!" ] }
         | Prefix "!echo" rest ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some rest }
+                   args = [ channel;
+                            sprintf ":%s" rest ] }
         | Prefix "!sosnool" rest ->
             let result =
                 if List.contains (rest.ToLower()) ["awesomelackware"] then
-                    Some "NIET."
+                    "NIET."
                 elif List.contains (rest.ToLower()) ["timdorohin"] then
-                    Some "Несколько раз."
+                    "Несколько раз."
                 else
-                    Some "Да."
+                    "Да."
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = result }
+                   args = [ channel;
+                            sprintf ":%s" result ] }
         | s when s.Contains "ЖМУ/Пинус" ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some "Жми лучше!" }
+                   args = [ channel;
+                            ":Жми лучше!" ] }
         | s when s.Contains " - " ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some "Сдохни, тварь!" }
+                   args = [ channel;
+                            ":Сдохни, тварь!" ] }
         | _ -> None
     | None | Some(_) -> None
 

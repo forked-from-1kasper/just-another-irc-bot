@@ -107,41 +107,40 @@ let trigger = ["ты"; "python"; "блядь";
 let lenin msg channel =
     match msg with
     | Some({nick = "awesomelackware"},
-           { command = "PRIVMSG"; text = Some("!die") }) ->
-        Some { command = "QUIT"; subject = None; text = None }
-    | Some(_, { command = "PRIVMSG"; text = Some(text) }) ->
+           { command = "PRIVMSG"; args = [_; "!die"] }) ->
+        Some { command = "QUIT"; args = [] }
+    | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
         match text with
         | Prefix "!version" _ ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some (sprintf "I on %A" Environment.Version) }
+                   args = [ channel;
+                            sprintf ":I on %A" Environment.Version ] }
         | Prefix "!date" _ ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some (sprintf "%A" System.DateTime.Now) }
+                   args = [ channel;
+                            sprintf ":%A" System.DateTime.Now ] }
         | Prefix "!help" _ ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some "Google it!" }
+                   args = [ channel; ":Google it!" ] }
         | Prefix "!echo" rest ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some rest }
+                   args = [ channel;
+                            sprintf ":%s" rest ] }
         | Prefix nick _ ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some (degenerate ()) }
+                   args = [ channel;
+                            sprintf ":%s" (degenerate ()) ] }
         | s when (List.map s.Contains trigger
                   |> List.exists ((=) true)) ->
             Some { command = "PRIVMSG";
-                   subject = Some channel;
-                   text = Some (degenerate ()) }
+                   args = [ channel;
+                            sprintf ":%s" (degenerate ()) ] }
         | _ -> None
     | _ -> None
 
 let learn msg channel =
     match msg with
-    | Some(_, { command = "PRIVMSG"; text = Some(text) }) ->
+    | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
         if text.Contains nick then None
         else
             let newKey =
@@ -163,7 +162,7 @@ let learn msg channel =
 let isGay msg channel =
     match msg with
     | Some({ nick = nick },
-           { command = "PRIVMSG"; text = Some(text) }) ->
+           { command = "PRIVMSG"; args = [_; text] }) ->
         match text with
         | Prefix "!isGay" rest ->
             let isPidoras = function
@@ -171,8 +170,8 @@ let isGay msg channel =
                 | _ -> "false"
 
             Some {command = "PRIVMSG";
-                  subject = Some channel;
-                  text = Some (sprintf "%s: %s" nick (isPidoras rest))}
+                  args = [ channel;
+                           sprintf ":%s: %s" nick (isPidoras rest) ]}
         | _ -> None
     | _ -> None
 

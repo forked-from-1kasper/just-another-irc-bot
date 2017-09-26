@@ -10,8 +10,7 @@ type Person = { nick : string;
                 ident : string}
 
 type Message = { command : string;
-                 subject : string option;
-                 text : string option }
+                 args : List<string> }
 
 type VesitorMessage = Person * Message
 
@@ -31,28 +30,24 @@ let private ircParseMsg (line : string) =
     if matches.Success then
         let values = List.tail [ for g in matches.Groups -> g.Value ]
         let text = values.[4]
+        let args =
+            if System.String.IsNullOrEmpty text then
+                [ values.[3] ]
+            else
+                [ values.[3]; text ]
+        
         Some (({ nick = values.[0];
                  ident = values.[1] },
                { command = values.[2];
-                 subject = Some values.[3];
-                 text = if System.String.IsNullOrEmpty text
-                        then None
-                        else Some(text)}))
+                 args = args }))
     else
         None
 
 let private messageToString { command = command;
-                              subject = subjectOpt;
-                              text = textOpt} =
+                              args = args} =
 
-    let nullOrSubj = function
-    | Some(a) -> a + " "
-    | None -> ""
-    
-    let subject = nullOrSubj subjectOpt
-    let text = nullOrSubj textOpt
-
-    sprintf "%s %s:%s" command subject text
+    let concated = args |> String.concat " "
+    sprintf "%s %s" command concated
 
 type public IrcBot(server : string, port, channel, nick, funcs) =
     member this.server = server
