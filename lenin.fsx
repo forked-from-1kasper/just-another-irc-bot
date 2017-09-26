@@ -24,7 +24,7 @@ let nick = "Poehavshy"
 //    support ""
 
 let makeOrAdd key elem (map : Map<_, _>) =
-    if map.ContainsKey key thens
+    if map.ContainsKey key then
         Map.add key (List.append elem map.[key]) map
     else
         Map.add key elem map
@@ -107,9 +107,9 @@ let trigger = ["ты"; "python"; "блядь";
 let lenin msg channel =
     match msg with
     | Some({nick = "awesomelackware"},
-           { command = "PRIVMSG"; text = Some("!die")}) ->
+           { command = "PRIVMSG"; text = Some("!die") }) ->
         Some { command = "QUIT"; subject = None; text = None }
-    | Some(_, { command = "PRIVMSG"; text = Some(text)}) ->
+    | Some(_, { command = "PRIVMSG"; text = Some(text) }) ->
         match text with
         | Prefix "!version" _ ->
             Some { command = "PRIVMSG";
@@ -137,11 +137,11 @@ let lenin msg channel =
                    subject = Some channel;
                    text = Some (degenerate ()) }
         | _ -> None
-    | None | Some(_) -> None
+    | _ -> None
 
 let learn msg channel =
     match msg with
-    | Some(_, { command = "PRIVMSG"; text = Some(text)}) ->
+    | Some(_, { command = "PRIVMSG"; text = Some(text) }) ->
         if text.Contains nick then None
         else
             let newKey =
@@ -160,6 +160,22 @@ let learn msg channel =
             None
     | _ -> None
 
-let funcs = [lenin; learn]
+let isGay msg channel =
+    match msg with
+    | Some({ nick = nick },
+           { command = "PRIVMSG"; text = Some(text) }) ->
+        match text with
+        | Prefix "!isGay" rest ->
+            let isPidoras = function
+                | "timdorohin" -> "true"
+                | _ -> "false"
+
+            Some {command = "PRIVMSG";
+                  subject = Some channel;
+                  text = Some (sprintf "%s: %s" nick (isPidoras rest))}
+        | _ -> None
+    | _ -> None
+
+let funcs = [lenin; learn; isGay]
 let myBot = new IrcBot(server, port, channel, nick, funcs)
 myBot.loop ()
