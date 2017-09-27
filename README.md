@@ -1,3 +1,1 @@
-To run:
-	fsc -a bot.fs
-	fsi test.fsx
+To run: `fsc -a bot.fs` and `fsi test.fsx`.
