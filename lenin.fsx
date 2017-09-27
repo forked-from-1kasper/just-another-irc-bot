@@ -146,7 +146,9 @@ let learn msg channel =
                 // remove nick from "nick: xxx"
                 let index = text.IndexOf ":" // nick: xxx xxx xxx
                                              //     ^
-                if (index < 0) || (index + 1 > text.Length) then
+                if (index < 0) ||
+                   (index + 1 > text.Length) ||
+                   (index + 2 > text.Length) then
                     text
                 else
                     text.Substring (index + 2) // nick: xxx xxx xxx
