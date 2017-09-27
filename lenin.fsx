@@ -7,7 +7,7 @@ open System.IO
 
 let server = "chat.freenode.net"
 let port = 6667
-let channel = "#lor"
+let channel = "#megaepichui"
 let nick = "Poehavshy"
 
 //let lines =
@@ -47,7 +47,6 @@ let mergeMap a (b : Map<_, _>) =
 
 let megahitlersplit (str : string) =
     Array.chunkBySize 2 (str.Split [| ' ' |])
-    |> Array.map Seq.ofArray
     |> Array.map (String.concat " ")
 
 let mutable wordsMap =
@@ -143,8 +142,18 @@ let learn msg channel =
     | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
         if text.Contains nick then None
         else
+            let textWithoutNick =
+                // remove nick from "nick: xxx"
+                let index = text.IndexOf ":" // nick: xxx xxx xxx
+                                             //     ^
+                if (index < 0) || (index + 1 > text.Length) then
+                    text
+                else
+                    text.Substring (index + 2) // nick: xxx xxx xxx
+                                               //     012
+                    
             let newKey =
-                text
+                textWithoutNick
                 |> (fun s -> if s.EndsWith "." ||
                                 s.EndsWith "?" ||
                                 s.EndsWith "!" then s.Remove (s.Length - 1)
@@ -169,12 +178,49 @@ let isGay msg channel =
                 | "timdorohin" -> "true"
                 | _ -> "false"
 
-            Some {command = "PRIVMSG";
-                  args = [ channel;
-                           sprintf ":%s: %s" nick (isPidoras rest) ]}
+            Some { command = "PRIVMSG";
+                   args = [ channel;
+                            sprintf ":%s: %s" nick (isPidoras rest) ] }
         | _ -> None
     | _ -> None
 
-let funcs = [lenin; learn; isGay]
+let SIEGHEIL msg channel =
+    match msg with
+    | Some({ nick = nick },
+           { command = "JOIN"; args = [_] }) ->
+        Some { command = "PRIVMSG";
+               args = [ channel;
+                        sprintf ":%s: SIEG HEIL" nick ]}
+    | _ -> None
+
+let sorry msg channel =
+    match msg with
+    | Some({ nick = nick },
+           { command = "PRIVMSG"; args = [_; text] }) ->
+        match text with
+        | Prefix "!пожалеть" _ ->
+            Some { command = "PRIVMSG";
+                   args = [ channel;
+                            sprintf ":%s: Пожалел тебе за щёку." nick ] }
+        | _ -> None
+    | _ -> None
+
+let admin msg channel =
+    match msg with
+    | Some({ nick = nick },
+           { command = "PRIVMSG"; args = [_; text] }) when
+      List.contains nick ["awesomelackware"; "timdorohin"] ->
+          match text with
+          | Prefix "!дайодменку" _ ->
+              Some { command = "MODE";
+                     args = [ channel; "+o"; nick ] }
+          | _ -> None
+    | _ -> None
+
+let printer msg channel =
+    printfn "%A" msg
+    None
+
+let funcs = [lenin; learn; isGay; sorry; admin; SIEGHEIL]
 let myBot = new IrcBot(server, port, channel, nick, funcs)
 myBot.loop ()
