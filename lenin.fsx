@@ -7,7 +7,7 @@ open System.IO
 
 let server = "chat.freenode.net"
 let port = 6667
-let channel = "#megaepichui"
+let channel = "#lor"
 let nick = "Poehavshy"
 
 //let lines =
@@ -219,10 +219,35 @@ let admin msg channel =
           | _ -> None
     | _ -> None
 
-let printer msg channel =
-    printfn "%A" msg
-    None
 
-let funcs = [lenin; learn; isGay; sorry; admin; SIEGHEIL]
+let question = "Выборы в президенты АСАШАЙ"
+let mutable options = [("Трамп", 0);
+                       ("Хиллари", 0);
+                       ("Шоман", -7)] |> Map.ofList
+let mutable (alreadyVoted : List<string>) = []
+
+let vote msg channel =
+    match msg with
+    | Some({ ident = ident },
+           { command = "PRIVMSG"; args = [_; text] }) ->
+        match text with
+        | Prefix "!results" _ ->
+            Some { command = "PRIVMSG";
+                   args = [ channel;
+                            sprintf ":%s" (options.ToString ()) ] }
+        | Prefix "!vote" key ->
+            if (options.ContainsKey key) && (not (List.contains ident alreadyVoted)) then
+                options <- Map.add key (options.[key] + 1) options
+                alreadyVoted <- ident :: alreadyVoted
+                ()
+            None
+        | Prefix "!question" _ ->
+            Some { command = "PRIVMSG";
+                   args = [ channel;
+                            sprintf ":%s" question ] }
+        | _ -> None
+    | _ -> None
+
+let funcs = [vote]
 let myBot = new IrcBot(server, port, channel, nick, funcs)
 myBot.loop ()
