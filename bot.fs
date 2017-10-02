@@ -24,7 +24,7 @@ let private ircGetMsg (line : string) =
     line.Substring(line.Substring(1).IndexOf(":") + 2)
 
 let private ircParseMsg (line : string) =
-    let rx = new Regex(@":(\S+)!~(\S+) (\S+) (\S+) ?:?(.*)")
+    let rx = new Regex(@":(\S+)!(\S+) (\S+) (\S+) ?:?(.*)")
     let matches = rx.Match line
 
     if matches.Success then

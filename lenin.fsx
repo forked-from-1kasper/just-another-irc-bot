@@ -220,31 +220,121 @@ let admin msg channel =
     | _ -> None
 
 
-let question = "Выборы в президенты АСАШАЙ"
-let mutable options = [("Трамп", 0);
-                       ("Хиллари", 0);
-                       ("Шоман", -7)] |> Map.ofList
-let mutable (alreadyVoted : List<string>) = []
+let mutable questions = ["Сколько гигабайт оперативки нужно, чтобы запустить Atom?"]
+let mutable options = [(([("0.1", 0);
+                          ("1", 0);
+                          ("2", 0);
+                          ("4", 0);
+                          ("8", 0);
+                          ("16", 0);
+                          ("32", 0);
+                          ("64", 0);
+                          ("128", 0);
+                          (">128", 0)] |> Map.ofList), "awesomelackware")]
+let mutable (alreadyVoted : List<int * string>) = []
 
+let help = ":!results номер; !vote номер/вариант; !question номер; !newquestion вопрос/вариант1 вариант2 …; !removequestion номер; !allquestions;"
 let vote msg channel =
     match msg with
-    | Some({ ident = ident },
+    | Some({ ident = ident; nick = nick },
            { command = "PRIVMSG"; args = [_; text] }) ->
         match text with
-        | Prefix "!results" _ ->
+        | Prefix "!results" optionString ->
+            match Int32.TryParse optionString with
+            | (true, option) when option >= 0 ->
+                let toPrint =
+                    let (current, _) = options.[option]
+                    Map.toList current
+                    |> List.map (fun (vote, result) -> sprintf "«%s»: %d" vote result)
+                    |> String.concat "; "
+                if option < options.Length then
+                    Some { command = "PRIVMSG";
+                           args = [ channel;
+                                    sprintf ":%s → %s" questions.[option] toPrint ] }
+
+                else None
+            | _ -> None
+            
+        | Prefix "!vote" rest ->
+            match rest.Split [| '/' |] with
+            | [| optionString; key |] ->
+                match Int32.TryParse optionString with
+                | (true, option) ->
+                    let (currentOptions, author) = options.[option]
+                    if (currentOptions.ContainsKey key) &&
+                       (not (List.contains (option, ident) alreadyVoted)) &&
+                       (option < options.Length) &&
+                       (option >= 0) then
+                        options <- List.mapi (fun index elem ->
+                                                  if (index = option) then
+                                                      (Map.add key (currentOptions.[key] + 1) currentOptions,
+                                                       author)
+                                                  else
+                                                      elem) options
+                        alreadyVoted <- List.append alreadyVoted [(option, ident)]
+                        ()
+                    None
+                | (false, _) -> None
+            | _ -> None
+            
+        | Prefix "!question" optionString ->
+            match Int32.TryParse optionString with
+            | (true, option) ->
+                if (option < options.Length) &&
+                   (option >= 0) then
+                    Some { command = "PRIVMSG";
+                           args = [ channel;
+                                    sprintf ":%s" questions.[option] ] }
+                else None
+            | _ -> None
+            
+        | Prefix "!newquestion" rest ->
+            let make question variants =
+                questions <- List.append questions [question]
+                options <- List.append options [((Array.map (fun s -> (s, 0)) variants
+                                                  |> Map.ofArray), ident)]
+
+            match rest.Split [| '/' |] with
+            | [| question; variants |] ->
+                make question (variants.Split [| ' ' |])
+                None
+            | [| question |] ->
+                make question [| "Да"; "Нет" |]
+                None
+            | _ -> None
+
+        | Prefix "!removequestion" optionString ->
+            match Int32.TryParse optionString with
+            | (true, option) ->
+                if (option < options.Length) && (option >= 0) then
+                    let (_, author) = options.[option]
+                    if (ident = author) || (nick = "awesomelackware") then
+                        if (options.Length = 1) || (options.Length = 0) then
+                            options <- []
+                            questions <- []
+                            alreadyVoted <- []
+                        else
+                            options <- List.append options.[..option-1] options.[option+1..]
+                            questions <- List.append questions.[..option-1] questions.[option+1..]
+                            alreadyVoted <- List.filter (fun (x, _) -> x <> option) alreadyVoted
+                        ()
+                    None
+                else
+                    None
+            | _ -> None
+
+        | Prefix "!allquestions" _ ->
+            let toPrint =
+                List.mapi (fun index s -> sprintf "%d: «%s»" index s) questions
+                |> String.concat "; "
             Some { command = "PRIVMSG";
                    args = [ channel;
-                            sprintf ":%s" (options.ToString ()) ] }
-        | Prefix "!vote" key ->
-            if (options.ContainsKey key) && (not (List.contains ident alreadyVoted)) then
-                options <- Map.add key (options.[key] + 1) options
-                alreadyVoted <- ident :: alreadyVoted
-                ()
-            None
-        | Prefix "!question" _ ->
+                            sprintf ":%s" toPrint ]}
+
+        | Prefix "!helpVote" _ ->
             Some { command = "PRIVMSG";
-                   args = [ channel;
-                            sprintf ":%s" question ] }
+                   args = [ channel; help ] }
+
         | _ -> None
     | _ -> None
 
