@@ -252,7 +252,6 @@ let vote msg channel =
                        args = [ channel;
                                 sprintf ":%s → %s" questions.[option] toPrint ] }
 
-                else None
             | _ -> None
             
         | Prefix "!vote" rest ->
