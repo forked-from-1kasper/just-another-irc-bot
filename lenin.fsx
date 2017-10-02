@@ -272,7 +272,7 @@ let vote msg channel =
                         alreadyVoted <- List.append alreadyVoted [(option, ident)]
                         ()
                     None
-                | (false, _) -> None
+                | _ -> None
             | _ -> None
             
         | Prefix "!question" optionString ->
