@@ -259,12 +259,10 @@ let vote msg channel =
             match rest.Split [| '/' |] with
             | [| optionString; key |] ->
                 match Int32.TryParse optionString with
-                | (true, option) ->
+                | (true, option) when (option < options.Length) && (option >= 0) ->
                     let (currentOptions, author) = options.[option]
                     if (currentOptions.ContainsKey key) &&
-                       (not (List.contains (option, ident) alreadyVoted)) &&
-                       (option < options.Length) &&
-                       (option >= 0) then
+                       (not (List.contains (option, ident) alreadyVoted)) then
                         options <- List.mapi (fun index elem ->
                                                   if (index = option) then
                                                       (Map.add key (currentOptions.[key] + 1) currentOptions,
