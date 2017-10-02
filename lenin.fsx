@@ -241,16 +241,16 @@ let vote msg channel =
         match text with
         | Prefix "!results" optionString ->
             match Int32.TryParse optionString with
-            | (true, option) when option >= 0 ->
+            | (true, option) when (option >= 0) && (option < options.Length) ->
                 let toPrint =
                     let (current, _) = options.[option]
                     Map.toList current
                     |> List.map (fun (vote, result) -> sprintf "«%s»: %d" vote result)
                     |> String.concat "; "
-                if option < options.Length then
-                    Some { command = "PRIVMSG";
-                           args = [ channel;
-                                    sprintf ":%s → %s" questions.[option] toPrint ] }
+
+                Some { command = "PRIVMSG";
+                       args = [ channel;
+                                sprintf ":%s → %s" questions.[option] toPrint ] }
 
                 else None
             | _ -> None
