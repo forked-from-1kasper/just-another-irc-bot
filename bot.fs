@@ -78,14 +78,9 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
                 ircPing ircWriter this.server
     
             List.map (fun x -> x msg channel) funcs
-            |> List.map (fun x ->
-                         match x with
-                         | Some(s) -> Some (messageToString s)
-                         | None -> None)
-            |> List.iter (fun x ->
-                          match x with
-                          | Some(s) -> ircWriter.WriteLine(s)
-                          | None -> ())
+            |> List.concat
+            |> List.map (fun x -> messageToString x)
+            |> List.iter (fun x -> ircWriter.WriteLine(x))
             //|> List.iter (fun x ->
             //              match x with
             //              | Some(s) -> ircPrivmsg ircWriter this.channel s
