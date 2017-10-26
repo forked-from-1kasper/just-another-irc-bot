@@ -1,1 +1,1 @@
-To run: `fsc -a bot.fs` and `fsi test.fsx`.
+To run: `make all` and `fsi test.fsx` or `fsi sample-bot.fsx`.
