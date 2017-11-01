@@ -1,4 +1,4 @@
-#r "bot.dll"
+#r "IRCBot.dll"
 #r "IRCBot.Public.Prefix.dll"
 #r "IRCBot.Public.Constants.dll"
 #r "IRCBot.Modules.Vote.dll"
