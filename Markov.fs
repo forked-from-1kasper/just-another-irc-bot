@@ -13,6 +13,7 @@ open Newtonsoft.Json
 let DBLocation = "db.json"
 
 let serializer = Newtonsoft.Json.JsonSerializer ()
+
 let saveDB (fileName : string) db =
     use sw = new StreamWriter (fileName)
     serializer.Serialize ((new JsonTextWriter (sw)), db)
@@ -22,22 +23,22 @@ let loadDB (fileName : string) =
 
 let mutable wordsMap = loadDB DBLocation
 
-let lines =
-    use sr = new StreamReader ("lurka.txt")
+//let lines =
+//    use sr = new StreamReader ("lurka.txt")
+//
+//    let rec support buf =
+//        if sr.EndOfStream then buf
+//        else
+//            if String.IsNullOrEmpty buf then
+//                support (sr.ReadLine ())
+//            else
+//                support (buf + " " + sr.ReadLine ())
+//
+//    support ""
 
-    let rec support buf =
-        if sr.EndOfStream then buf
-        else
-            if String.IsNullOrEmpty buf then
-                support (sr.ReadLine ())
-            else
-                support (buf + " " + sr.ReadLine ())
-
-    support ""
-
-let megahitlersplit (str : string) =
-    Array.chunkBySize 1 (str.Split [| ' ' |])
-    |> Array.map (String.concat " ")    
+//let megahitlersplit (str : string) =
+//    Array.chunkBySize 1 (str.Split [| ' ' |])
+//    |> Array.map (String.concat " ")    
 
 let makeOrAdd key elem (map : Map<_, _>) =
     if map.ContainsKey key then
@@ -89,14 +90,14 @@ let makeShiz (map : Map<_, _>) =
 
     support "" "*START*"
 
-let rec degenerate () =
+let public rec degenerate () =
     let current = makeShiz wordsMap
     if Encoding.UTF8.GetByteCount current > 256 then
         degenerate ()
     else
         current
 
-let trigger = ["ты"; "python"; "блядь";
+let private trigger = ["ты"; "python"; "блядь";
                "фап"; "линукс"; "шиндошс";
                "сперма"; "зига"; "тимка";
                "сосёт"; "сосет"; "генту";
@@ -104,7 +105,7 @@ let trigger = ["ты"; "python"; "блядь";
                "мамбет"; "#"; "геи";
                "гей"; "пидор"; "пидорас"]
 
-let learn msg channel =
+let public learn msg channel =
     match msg with
     | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
         if text.Contains botNick |> not then
@@ -133,12 +134,6 @@ let learn msg channel =
                 |> fun (_, b) -> b
     
             wordsMap <- mergeMap wordsMap newKey
-            
-        match text with
-        | Prefix "!saveDB" _ ->
-            saveDB DBLocation wordsMap
-            ()
-        | _ -> ()
 
         []
     | _ -> []

@@ -22,7 +22,21 @@ open Markov
 
 open System
 
-//let funcs = [showLinksTitle; sorry; SIEGHEIL; sample; vote; punto; saveLastMessage; zogControl]
+//all: [showLinksTitle; sorry; SIEGHEIL; sample; vote; punto; saveLastMessage; zogControl]
 let funcs = [showLinksTitle; vote; SIEGHEIL; sample; learn]
 let myBot = new IrcBot(server, port, channel, botNick, funcs)
-myBot.loop ()
+
+let public saveDBAsync (sleepTime : int) =
+    async {
+        while true do
+            printfn "[db-save] saving db"
+            Markov.saveDB Markov.DBLocation Markov.wordsMap
+            printfn "[db-save] done saving, sleep"
+        
+            do! Async.Sleep(sleepTime)
+        return ()
+    }
+
+[ (async { myBot.loop () }); (saveDBAsync 5000) ]
+|> Async.Parallel
+|> Async.RunSynchronously

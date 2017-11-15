@@ -10,7 +10,7 @@ open System
 
 let sample msg channel =
     match msg with
-    | Some({nick = "awesomelackware"},
+    | Some({ nick = "awesomelackware" },
            { command = "PRIVMSG"; args = [_; "!die"] }) ->
         [{ command = "QUIT"; args = [] }]
 

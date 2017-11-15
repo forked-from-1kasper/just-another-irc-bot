@@ -69,6 +69,12 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
         ircWriter.WriteLine(sprintf "NICK %s" this.nick)
         ircWriter.WriteLine(sprintf "JOIN %s" this.channel)
 
+        let wrapper func msg channel =
+            async {
+                return (func msg channel
+                        |> List.map messageToString)
+            }
+
         while ircReader.EndOfStream = false do
             let line = ircReader.ReadLine ()
             printfn "%s" line
@@ -77,11 +83,20 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
 
             if line.Contains "PING" then
                 ircPing ircWriter this.server
-    
-            List.map (fun x -> x msg channel) funcs
+
+            List.map (fun func -> wrapper func msg channel) funcs
+            |> Async.Parallel
+            |> Async.RunSynchronously
+            |> Array.filter ((<>) [])
+            |> List.ofArray
             |> List.concat
-            |> List.map (fun x -> messageToString x)
             |> List.iter (fun x -> ircWriter.WriteLine(x))
+    
+            //List.map (fun x -> x msg channel) funcs
+            //|> List.concat
+            //|> List.map (fun x -> messageToString x)
+            //|> List.iter (fun x -> ircWriter.WriteLine(x))
+            
             //|> List.iter (fun x ->
             //              match x with
             //              | Some(s) -> ircPrivmsg ircWriter this.channel s
