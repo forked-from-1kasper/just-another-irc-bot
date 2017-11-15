@@ -25,8 +25,9 @@ let private ircGetMsg (line : string) =
 
 let private ircParseMsg (line : string) =
     let rx = new Regex(@":(\S+)!(\S+) (\S+) (\S+) ?:?(.*)")
-    let matches = rx.Match line
+    //                     nick!ident comnd chan  teeeext
 
+    let matches = rx.Match line
     if matches.Success then
         let values = List.tail [ for g in matches.Groups -> g.Value ]
         let text = values.[4]
@@ -36,10 +37,10 @@ let private ircParseMsg (line : string) =
             else
                 [ values.[3]; text ]
         
-        Some (({ nick = values.[0];
-                 ident = values.[1] },
-               { command = values.[2];
-                 args = args }))
+        Some ({ nick = values.[0];
+                ident = values.[1] },
+              { command = values.[2];
+                args = args })
     else
         None
 

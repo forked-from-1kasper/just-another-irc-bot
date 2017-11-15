@@ -6,6 +6,21 @@ open System.Text
 
 open IRCBot
 open IRCBot.Public.Constants
+open IRCBot.Public.Prefix
+
+open Newtonsoft.Json
+
+let DBLocation = "db.json"
+
+let serializer = Newtonsoft.Json.JsonSerializer ()
+let saveDB (fileName : string) db =
+    use sw = new StreamWriter (fileName)
+    serializer.Serialize ((new JsonTextWriter (sw)), db)
+
+let loadDB (fileName : string) =
+    JsonConvert.DeserializeObject<Map<string, List<string>>>(File.ReadAllText (fileName))
+
+let mutable wordsMap = loadDB DBLocation
 
 let lines =
     use sr = new StreamReader ("lurka.txt")
@@ -20,6 +35,10 @@ let lines =
 
     support ""
 
+let megahitlersplit (str : string) =
+    Array.chunkBySize 1 (str.Split [| ' ' |])
+    |> Array.map (String.concat " ")    
+
 let makeOrAdd key elem (map : Map<_, _>) =
     if map.ContainsKey key then
         Map.add key (List.append elem map.[key]) map
@@ -28,7 +47,6 @@ let makeOrAdd key elem (map : Map<_, _>) =
 
 let DasIstMagic (someList : 'a array) =
     let magic (b, a) c = (c, (makeOrAdd b [c] a))
-
     Array.fold magic (someList.[0], [someList.[0], [someList.[1]]] |> Map.ofList) (Array.tail someList)
 
 let mergeMap a (b : Map<_, _>) =
@@ -42,22 +60,17 @@ let mergeMap a (b : Map<_, _>) =
     let keys = Map.toList b |> List.map (fun (a, _) -> a)
     support a keys
 
-let megahitlersplit (str : string) =
-    Array.chunkBySize 1 (str.Split [| ' ' |])
-    |> Array.map (String.concat " ")
-
-let mutable wordsMap =
+//let mutable wordsMap =
 //    [("*START*", ["Да"]);
 //     ("Да", ["*END*"])] |> Map.ofList
-    lines
-    |> fun x -> x.Split([| ". " |], StringSplitOptions.None)
-    //|> Array.map (fun elem -> elem.Split([| ' ' |]))
-    |> Array.map megahitlersplit
-    |> Array.map (fun elem -> Array.append [| "*START*" |] elem
-                              |> fun x -> Array.append x [| "*END*" |])
-    |> Array.map DasIstMagic
-    |> Array.map (fun (_, b) -> b)
-    |> fun x -> Array.fold mergeMap (Array.head x) (Array.tail x)
+//    //lines
+//    //|> fun x -> x.Split([| ". " |], StringSplitOptions.None)
+//    //|> Array.map megahitlersplit
+//    //|> Array.map (fun elem -> Array.append [| "*START*" |] elem
+//    //                          |> fun x -> Array.append x [| "*END*" |])
+//    //|> Array.map DasIstMagic
+//    //|> Array.map (fun (_, b) -> b)
+//    //|> fun x -> Array.fold mergeMap (Array.head x) (Array.tail x)
 
 let makeShiz (map : Map<_, _>) =
     let rec support acc current =
@@ -94,8 +107,7 @@ let trigger = ["ты"; "python"; "блядь";
 let learn msg channel =
     match msg with
     | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
-        if text.Contains botNick then []
-        else
+        if text.Contains botNick |> not then
             let textWithoutNick =
                 // remove nick from "nick: xxx"
                 let index = text.IndexOf ":" // nick: xxx xxx xxx
@@ -121,5 +133,12 @@ let learn msg channel =
                 |> fun (_, b) -> b
     
             wordsMap <- mergeMap wordsMap newKey
-            []
+            
+        match text with
+        | Prefix "!saveDB" _ ->
+            saveDB DBLocation wordsMap
+            ()
+        | _ -> ()
+
+        []
     | _ -> []

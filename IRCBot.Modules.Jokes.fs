@@ -41,6 +41,10 @@ let sorry msg channel =
              { command = "PRIVMSG";
                args = [ channel;
                         sprintf ":%s: Проверяй." nick ] }]
+        | Prefix "!лучше" _ ->
+            [{ command = "PRIVMSG";
+               args = [ channel;
+                        ":Дуднет рулит, ко‐ко‐ко" ] }]
         | _ -> []
     | _ -> []
 
