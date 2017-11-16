@@ -108,7 +108,8 @@ let public trigger = ["ты"; "python"; "блядь";
 let public learn(msg, channel) =
     match msg with
     | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
-        if text.Contains botNick |> not then
+        if (text.Contains botNick |> not) ||
+           (text.StartsWith "!" |> not) then
             let textWithoutNick =
                 // remove nick from "nick: xxx"
                 let index = text.IndexOf ":" // nick: xxx xxx xxx
