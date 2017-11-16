@@ -4,7 +4,7 @@ open IRCBot
 open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
 
-let isGay msg channel =
+let isGay(msg, channel) =
     match msg with
     | Some({ nick = nick },
            { command = "PRIVMSG"; args = [_; text] }) ->
@@ -20,7 +20,7 @@ let isGay msg channel =
         | _ -> []
     | _ -> []
 
-let SIEGHEIL msg channel =
+let SIEGHEIL(msg, channel) =
     match msg with
     | Some({ nick = nick },
            { command = "JOIN"; args = [_] }) when nick <> botNick ->
@@ -29,7 +29,7 @@ let SIEGHEIL msg channel =
                     sprintf ":%s: ты гей" nick ]}]
     | _ -> []
 
-let sorry msg channel =
+let sorry(msg, channel) =
     match msg with
     | Some({ nick = nick },
            { command = "PRIVMSG"; args = [_; text] }) ->
@@ -48,7 +48,7 @@ let sorry msg channel =
         | _ -> []
     | _ -> []
 
-let admin msg channel =
+let admin(msg, channel) =
     match msg with
     | Some({ nick = nick },
            { command = "PRIVMSG"; args = [_; text] }) when

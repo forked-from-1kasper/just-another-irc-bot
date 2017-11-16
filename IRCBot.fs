@@ -71,7 +71,7 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
 
         let wrapper func msg channel =
             async {
-                return (func msg channel
+                return (func (msg, channel)
                         |> List.map messageToString)
             }
 

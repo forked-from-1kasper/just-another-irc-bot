@@ -40,7 +40,7 @@ let fixLayout s =
 
 let mutable (lastMessages : Map<string, string>) = [] |> Map.ofList
 
-let punto msg channel =
+let punto(msg, channel) =
     match msg with
     | Some({ nick = nick; ident = ident },
            { command = "PRIVMSG"; args = [_; text] }) ->
@@ -54,7 +54,7 @@ let punto msg channel =
         | _ -> []
     | _ -> []
 
-let saveLastMessage msg channel =
+let saveLastMessage(msg, channel) =
     match msg with
     | Some({ nick = nick },
            { command = "PRIVMSG"; args = [_; text] }) ->

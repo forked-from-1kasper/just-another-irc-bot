@@ -1,4 +1,4 @@
-#r "bot.dll"
+#r "IRCBot.dll"
 
 open IRCBot
 open System

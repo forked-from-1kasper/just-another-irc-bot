@@ -8,7 +8,7 @@ open IRCBot.Public.Prefix
 
 open System
 
-let sample msg channel =
+let sample(msg, channel) =
     match msg with
     | Some({ nick = "awesomelackware" },
            { command = "PRIVMSG"; args = [_; "!die"] }) ->

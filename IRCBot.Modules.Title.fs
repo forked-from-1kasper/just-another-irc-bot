@@ -16,7 +16,7 @@ let getTitle (link : string) =
             printfn "Unhandled Exception: %s" ex.Message
             None
 
-let showLinksTitle msg channel =
+let showLinksTitle(msg, channel) =
     match msg with
     | Some (_, { command = "PRIVMSG"; args = [_; text] }) ->
         text.Split [| ' ' |]

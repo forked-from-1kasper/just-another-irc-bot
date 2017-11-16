@@ -36,9 +36,9 @@ let mutable wordsMap = loadDB DBLocation
 //
 //    support ""
 
-//let megahitlersplit (str : string) =
-//    Array.chunkBySize 1 (str.Split [| ' ' |])
-//    |> Array.map (String.concat " ")    
+let megahitlersplit (str : string) =
+    Array.chunkBySize 1 (str.Split [| ' ' |])
+    |> Array.map (String.concat " ")    
 
 let makeOrAdd key elem (map : Map<_, _>) =
     if map.ContainsKey key then
@@ -90,22 +90,22 @@ let makeShiz (map : Map<_, _>) =
 
     support "" "*START*"
 
-let public rec degenerate () =
+let rec public degenerate () =
     let current = makeShiz wordsMap
     if Encoding.UTF8.GetByteCount current > 256 then
         degenerate ()
     else
         current
 
-let private trigger = ["ты"; "python"; "блядь";
-               "фап"; "линукс"; "шиндошс";
-               "сперма"; "зига"; "тимка";
-               "сосёт"; "сосет"; "генту";
-               "слака"; "ЛОР"; "овцы";
-               "мамбет"; "#"; "геи";
-               "гей"; "пидор"; "пидорас"]
+let public trigger = ["ты"; "python"; "блядь";
+                      "фап"; "линукс"; "шиндошс";
+                      "сперма"; "зига"; "тимка";
+                      "сосёт"; "сосет"; "генту";
+                      "слака"; "ЛОР"; "овцы";
+                      "мамбет"; "#"; "геи";
+                      "гей"; "пидор"; "пидорас"]
 
-let public learn msg channel =
+let public learn(msg, channel) =
     match msg with
     | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
         if text.Contains botNick |> not then
