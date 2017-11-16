@@ -18,7 +18,7 @@ let getTitle (link : string) =
 
 let showLinksTitle(msg, channel) =
     match msg with
-    | Some (_, { command = "PRIVMSG"; args = [_; text] }) ->
+    | Some (_, { command = "PRIVMSG"; args = [channel; text] }) ->
         text.Split [| ' ' |]
         |> List.ofArray
         |> List.filter (fun s ->

@@ -7,7 +7,7 @@ open IRCBot.Public.Constants
 let isGay(msg, channel) =
     match msg with
     | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [_; text] }) ->
+           { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
         | Prefix "!isGay" rest ->
             let isPidoras = function
@@ -23,7 +23,7 @@ let isGay(msg, channel) =
 let SIEGHEIL(msg, channel) =
     match msg with
     | Some({ nick = nick },
-           { command = "JOIN"; args = [_] }) when nick <> botNick ->
+           { command = "JOIN"; args = [channel] }) when nick <> botNick ->
         [{ command = "PRIVMSG";
            args = [ channel;
                     sprintf ":%s: ты гей" nick ]}]
@@ -32,7 +32,7 @@ let SIEGHEIL(msg, channel) =
 let sorry(msg, channel) =
     match msg with
     | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [_; text] }) ->
+           { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
         | Prefix "!пожалеть" _ ->
             [{ command = "PRIVMSG";
@@ -51,7 +51,7 @@ let sorry(msg, channel) =
 let admin(msg, channel) =
     match msg with
     | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [_; text] }) when
+           { command = "PRIVMSG"; args = [channel; text] }) when
       List.contains nick ["awesomelackware"; "timdorohin"] ->
           match text with
           | Prefix "!дайодменку" _ ->

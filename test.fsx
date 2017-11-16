@@ -14,7 +14,7 @@ let (|Prefix|_|) (p : string) (s : string) =
 
 let test msg channel =
     match msg with
-    | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
+    | Some(_, { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
         | Prefix "!version" rest ->
             [{ command = "PRIVMSG";

@@ -25,6 +25,7 @@ open System
 //all: [showLinksTitle; sorry; SIEGHEIL; sample; vote; punto; saveLastMessage; zogControl]
 let funcs = [showLinksTitle;
              vote;
+             admin;
              SIEGHEIL;
              sample;
              learn;

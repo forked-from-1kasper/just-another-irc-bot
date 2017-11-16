@@ -43,7 +43,7 @@ let mutable (lastMessages : Map<string, string>) = [] |> Map.ofList
 let punto(msg, channel) =
     match msg with
     | Some({ nick = nick; ident = ident },
-           { command = "PRIVMSG"; args = [_; text] }) ->
+           { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
         | Prefix "!fix" _ ->
             if lastMessages.ContainsKey nick then
@@ -57,7 +57,7 @@ let punto(msg, channel) =
 let saveLastMessage(msg, channel) =
     match msg with
     | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [_; text] }) ->
+           { command = "PRIVMSG"; args = [_; text] }) -> // FIXME: ignoring channel!
         lastMessages <- Map.add nick text lastMessages
         []
     | _ -> []

@@ -21,7 +21,7 @@ let private help = ":!results номер; !vote номер/вариант; !ques
 let public vote(msg, channel) =
     match msg with
     | Some({ ident = ident; nick = nick },
-           { command = "PRIVMSG"; args = [_; text] }) ->
+           { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
         | Prefix "!results" optionString ->
             match Int32.TryParse optionString with

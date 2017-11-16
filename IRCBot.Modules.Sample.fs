@@ -20,8 +20,14 @@ let sample(msg, channel) =
            args = [ channel;
                     sprintf ":%s" (degenerate ()) ] }]
 
-    | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
+    | Some({ nick = someNick },
+           { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
+        | Prefix "!join" newChannel ->
+            if someNick = "awesomelackware" then
+                [{ command = "JOIN";
+                   args = [ newChannel ] }]
+            else []
         | Prefix "!version" _ ->
             [{ command = "PRIVMSG";
                args = [ channel;
