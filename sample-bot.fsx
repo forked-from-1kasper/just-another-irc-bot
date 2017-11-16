@@ -23,7 +23,12 @@ open Markov
 open System
 
 //all: [showLinksTitle; sorry; SIEGHEIL; sample; vote; punto; saveLastMessage; zogControl]
-let funcs = [showLinksTitle; vote; SIEGHEIL; sample; learn]
+let funcs = [showLinksTitle;
+             vote;
+             SIEGHEIL;
+             sample;
+             learn;
+             bindAsyncFunctions [punto; saveLastMessage]]
 let myBot = new IrcBot(server, port, channel, botNick, funcs)
 
 let public saveDBAsync (sleepTime : int) =

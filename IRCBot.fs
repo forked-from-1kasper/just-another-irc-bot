@@ -50,6 +50,10 @@ let private messageToString { command = command;
     let concated = args |> String.concat " "
     sprintf "%s %s" command concated
 
+let public bindAsyncFunctions(funcs) =
+    fun (msg, channel) ->
+        List.fold (fun last func -> List.append last (func(msg, channel))) [] funcs
+
 type public IrcBot(server : string, port, channel, nick, funcs) =
     member this.server = server
     member this.port = port
