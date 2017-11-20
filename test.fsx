@@ -63,5 +63,5 @@ let channel = "#lor"
 let nick = "pidor-2"
 
 let funcs = [test]
-let myBot = new IrcBot(server, port, channel, nick, funcs)
+let myBot = new IrcBot(server, port, channel, nick, funcs, { order = Parallel; debug = false })
 myBot.loop ()

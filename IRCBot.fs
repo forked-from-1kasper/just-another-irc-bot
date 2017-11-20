@@ -14,6 +14,11 @@ type Message = { command : string;
 
 type VesitorMessage = Person * Message
 
+type Order = Parallel | Consistently
+type botMode =
+    { order: Order;
+      debug : bool }
+
 let private ircPing (writer : StreamWriter) server =
     writer.WriteLine(sprintf "PONG %s\n" server)
 
@@ -54,7 +59,7 @@ let public bindAsyncFunctions(funcs) =
     fun (msg, channel) ->
         List.fold (fun last func -> List.append last (func(msg, channel))) [] funcs
 
-type public IrcBot(server : string, port, channel, nick, funcs) =
+type public IrcBot(server : string, port, channel, nick, funcs, mode) =
     member this.server = server
     member this.port = port
     member this.channel = channel
@@ -76,7 +81,7 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
         let wrapper func msg channel =
             async {
                 return (func (msg, channel)
-                        |> List.map messageToString)
+                       |> List.map messageToString)
             }
 
         while ircReader.EndOfStream = false do
@@ -88,20 +93,25 @@ type public IrcBot(server : string, port, channel, nick, funcs) =
             if line.Contains "PING" then
                 ircPing ircWriter this.server
 
-            List.map (fun func -> wrapper func msg channel) funcs
-            |> Async.Parallel
-            |> Async.RunSynchronously
-            |> Array.filter ((<>) [])
-            |> List.ofArray
-            |> List.concat
-            |> List.iter (fun x -> ircWriter.WriteLine(x))
-    
-            //List.map (fun x -> x msg channel) funcs
-            //|> List.concat
-            //|> List.map (fun x -> messageToString x)
-            //|> List.iter (fun x -> ircWriter.WriteLine(x))
+            let stopwatch = System.Diagnostics.Stopwatch()
+            if mode.debug then
+                stopwatch.Start()
+
+            if mode.order = Parallel then
+                List.map (fun func -> wrapper func msg channel) funcs
+                |> Async.Parallel
+                |> Async.RunSynchronously
+                |> Array.filter ((<>) [])
+                |> List.ofArray
+                |> List.concat
+                |> List.iter (fun (x : string) -> ircWriter.WriteLine(x))
+            else
+                List.map (fun x -> x (msg, channel)) funcs
+                |> List.concat
+                |> List.map (fun x -> messageToString x)
+                |> List.iter (fun x -> ircWriter.WriteLine(x))
             
-            //|> List.iter (fun x ->
-            //              match x with
-            //              | Some(s) -> ircPrivmsg ircWriter this.channel s
-            //              | None -> ())
+            if mode.debug then
+                stopwatch.Stop()
+
+            printfn "(%f ms)" stopwatch.Elapsed.TotalMilliseconds

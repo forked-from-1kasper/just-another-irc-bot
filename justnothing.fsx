@@ -9,5 +9,5 @@ let channel = "##lorwiki"
 let nick = "just-nothing"
 
 let funcs = []
-let myBot = new IrcBot(server, port, channel, nick, funcs)
+let myBot = new IrcBot(server, port, channel, nick, funcs, { order = Parallel; debug = false })
 myBot.loop ()
