@@ -73,11 +73,11 @@ let mergeMap a (b : Map<_, _>) =
 //    //|> Array.map (fun (_, b) -> b)
 //    //|> fun x -> Array.fold mergeMap (Array.head x) (Array.tail x)
 
+let rnd = Random ()
 let makeShiz (map : Map<_, _>) =
     let rec support acc current =
         let (currentList : List<_>) = map.[current]
         let next =
-            let rnd = Random ()
             currentList.[rnd.Next (currentList.Length)]
 
         if next = "*END*" then
