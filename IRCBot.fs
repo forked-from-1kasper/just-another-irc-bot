@@ -23,6 +23,7 @@ type botMode =
 let private ircPing (writer : StreamWriter) server =
     printfn "+ PONG %s" server
     writer.WriteLine(sprintf "PONG %s\n" server)
+    ()
 
 let private ircPrivmsg (writer : StreamWriter) channel msg =
     writer.WriteLine(sprintf "PRIVMSG %s :%s\n" channel msg)
@@ -142,8 +143,9 @@ type public IrcBot(desc) =
             let msg = ircParseMsg line
 
             if line.StartsWith "PING" then
-                let _ :: server :: _ in // server must be without spaces
-                    ircPing this.writer server
+                match (line.Split [| ' ' |] |> List.ofArray) with
+                    | ["PING"; server] -> ircPing this.writer server // server must be without spaces
+                    | _ -> ()
 
             let stopwatch = System.Diagnostics.Stopwatch()
             if this.desc.mode.debug then
