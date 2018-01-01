@@ -70,5 +70,6 @@ let myBot = new IrcBot({ server = server;
                          funcs = funcs;
                          mode = { order = Parallel;
                                   debug = false };
-                         regular = []})
+                         regular = [];
+                         period = 1000})
 myBot.loop ()

@@ -90,7 +90,8 @@ type botDescription =
       botNick : string;
       funcs : List<(Person * Message) option * string -> Message list>;
       mode : botMode;
-      regular : List<DateTime -> Message list>}
+      regular : List<DateTime -> Message list>;
+      period : int}
 
 type public IrcBot(desc) =
     let client = new TcpClient()        
@@ -111,7 +112,7 @@ type public IrcBot(desc) =
 
     member this.cron () =
         while true do
-            Thread.Sleep 1000
+            Thread.Sleep this.desc.period
             let now = DateTime.Now
     
             if this.desc.mode.order = Parallel then

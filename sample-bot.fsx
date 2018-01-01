@@ -42,7 +42,8 @@ let myBot = new IrcBot ({ server = server;
                           funcs = funcs;
                           mode = { order = Parallel;
                                    debug = true };
-                          regular = [timing]})
+                          regular = [timing];
+                          period = 1000})
 
 let public saveDBAsync (sleepTime : int) =
     async {
