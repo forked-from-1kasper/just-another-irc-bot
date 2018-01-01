@@ -5,6 +5,7 @@ open System.IO
 open System.Net
 open System.Net.Sockets
 open System.Text.RegularExpressions
+open System.Threading
 
 type Person = { nick : string;
                 ident : string}
@@ -73,6 +74,15 @@ let silentPrint x =
     printfn "%A" x
     x
 
+let private parallelProcessing (writer : StreamWriter) =
+    Async.Parallel
+    >> Async.RunSynchronously
+    >> Array.filter ((<>) [])
+    >> List.ofArray
+    >> List.concat
+    >> List.iter (fun (x : string) -> writer.WriteLine(x))
+
+
 type botDescription =
     { server : string;
       port : int;
@@ -98,7 +108,23 @@ type public IrcBot(desc) =
     member this.ircClient = client
     member this.reader = ircReader
     member this.writer = ircWriter
-    //member this.cron () =
+
+    member this.cron () =
+        while true do
+            Thread.Sleep 1000
+            let now = DateTime.Now
+    
+            if this.desc.mode.order = Parallel then
+                List.map(fun func -> async {
+                                         return (func now
+                                                 |> List.map messageToString)
+                                     }) this.desc.regular
+                |> parallelProcessing this.writer
+            else
+                List.map(fun func -> func now) this.desc.regular
+                |> List.concat
+                |> List.map messageToString
+                |> List.iter (fun x -> this.writer.WriteLine(x))
 
     member this.loop () =
         while ircReader.EndOfStream = false do
@@ -118,16 +144,11 @@ type public IrcBot(desc) =
                 List.map (fun func ->
                           wrapper func msg this.desc.channel) this.desc.funcs
                 // TODO: remove this.desc.channel here
-                |> Async.Parallel
-                |> Async.RunSynchronously
-                |> Array.filter ((<>) [])
-                |> List.ofArray
-                |> List.concat
-                |> List.iter (fun (x : string) -> this.writer.WriteLine(x))
+                |> parallelProcessing this.writer
             else
                 List.map (fun x -> x (msg, this.desc.channel)) this.desc.funcs
                 |> List.concat
-                |> List.map (fun x -> messageToString x)
+                |> List.map messageToString
                 |> List.iter (fun x -> this.writer.WriteLine(x))
             
             if this.desc.mode.debug then

@@ -30,6 +30,11 @@ let funcs = [showLinksTitle;
              sample;
              learn;
              bindAsyncFunctions [punto; saveLastMessage]]
+
+let timing time = [{ command = "PRIVMSG";
+                     args = [channel;
+                             sprintf ":%A" time] }]
+
 let myBot = new IrcBot ({ server = server;
                           port = port;
                           channel = channel;
@@ -37,7 +42,7 @@ let myBot = new IrcBot ({ server = server;
                           funcs = funcs;
                           mode = { order = Parallel;
                                    debug = true };
-                          regular = []})
+                          regular = [timing]})
 
 let public saveDBAsync (sleepTime : int) =
     async {
@@ -50,6 +55,7 @@ let public saveDBAsync (sleepTime : int) =
         return ()
     }
 
-[ (async { myBot.loop () }); (saveDBAsync 5000) ]
+let asynced f = async { f () }
+[ asynced myBot.loop; asynced myBot.cron; (saveDBAsync 5000) ]
 |> Async.Parallel
 |> Async.RunSynchronously
