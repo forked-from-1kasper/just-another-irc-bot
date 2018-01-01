@@ -74,13 +74,17 @@ let silentPrint x =
     printfn "%A" x
     x
 
+let private writeAndPrint (writer : StreamWriter) s =
+    printfn "+ %s" s
+    writer.WriteLine(s)
+
 let private parallelProcessing (writer : StreamWriter) =
     Async.Parallel
     >> Async.RunSynchronously
     >> Array.filter ((<>) [])
     >> List.ofArray
     >> List.concat
-    >> List.iter (fun (x : string) -> writer.WriteLine(x))
+    >> List.iter (writeAndPrint writer)
 
 
 type botDescription =
@@ -112,7 +116,6 @@ type public IrcBot(desc) =
 
     member this.cron () =
         while true do
-            Thread.Sleep this.desc.period
             let now = DateTime.Now
     
             if this.desc.mode.order = Parallel then
@@ -125,12 +128,13 @@ type public IrcBot(desc) =
                 List.map(fun func -> func now) this.desc.regular
                 |> List.concat
                 |> List.map messageToString
-                |> List.iter (fun x -> this.writer.WriteLine(x))
+                |> List.iter (writeAndPrint this.writer)
+            Thread.Sleep this.desc.period
 
     member this.loop () =
         while ircReader.EndOfStream = false do
             let line = this.reader.ReadLine ()
-            printfn "%s" line
+            printfn "- %s" line
             
             let msg = ircParseMsg line
 
@@ -150,7 +154,7 @@ type public IrcBot(desc) =
                 List.map (fun x -> x (msg, this.desc.channel)) this.desc.funcs
                 |> List.concat
                 |> List.map messageToString
-                |> List.iter (fun x -> this.writer.WriteLine(x))
+                |> List.iter (writeAndPrint this.writer)
             
             if this.desc.mode.debug then
                 stopwatch.Stop()
