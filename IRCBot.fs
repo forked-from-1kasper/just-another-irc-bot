@@ -21,6 +21,7 @@ type botMode =
       debug : bool }
 
 let private ircPing (writer : StreamWriter) server =
+    printfn "+ PONG %s" server
     writer.WriteLine(sprintf "PONG %s\n" server)
 
 let private ircPrivmsg (writer : StreamWriter) channel msg =
@@ -86,6 +87,10 @@ let private parallelProcessing (writer : StreamWriter) =
     >> List.concat
     >> List.iter (writeAndPrint writer)
 
+let private simpleProcessing (writer : StreamWriter) =
+    List.concat
+    >> List.map messageToString
+    >> List.iter (writeAndPrint writer)
 
 type botDescription =
     { server : string;
@@ -126,9 +131,7 @@ type public IrcBot(desc) =
                 |> parallelProcessing this.writer
             else
                 List.map(fun func -> func now) this.desc.regular
-                |> List.concat
-                |> List.map messageToString
-                |> List.iter (writeAndPrint this.writer)
+                |> simpleProcessing this.writer
             Thread.Sleep this.desc.period
 
     member this.loop () =
@@ -138,8 +141,9 @@ type public IrcBot(desc) =
             
             let msg = ircParseMsg line
 
-            if line.Contains "PING" then
-                ircPing this.writer this.desc.server
+            if line.StartsWith "PING" then
+                let _ :: server :: _ in // server must be without spaces
+                    ircPing this.writer server
 
             let stopwatch = System.Diagnostics.Stopwatch()
             if this.desc.mode.debug then
@@ -152,9 +156,7 @@ type public IrcBot(desc) =
                 |> parallelProcessing this.writer
             else
                 List.map (fun x -> x (msg, this.desc.channel)) this.desc.funcs
-                |> List.concat
-                |> List.map messageToString
-                |> List.iter (writeAndPrint this.writer)
+                |> simpleProcessing this.writer
             
             if this.desc.mode.debug then
                 stopwatch.Stop()
