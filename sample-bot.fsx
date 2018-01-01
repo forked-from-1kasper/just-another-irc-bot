@@ -30,7 +30,14 @@ let funcs = [showLinksTitle;
              sample;
              learn;
              bindAsyncFunctions [punto; saveLastMessage]]
-let myBot = new IrcBot(server, port, channel, botNick, funcs, { order = Parallel; debug = true })
+let myBot = new IrcBot ({ server = server;
+                          port = port;
+                          channel = channel;
+                          botNick = botNick;
+                          funcs = funcs;
+                          mode = { order = Parallel;
+                                   debug = true };
+                          regular = []})
 
 let public saveDBAsync (sleepTime : int) =
     async {

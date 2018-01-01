@@ -59,59 +59,78 @@ let public bindAsyncFunctions(funcs) =
     fun (msg, channel) ->
         List.fold (fun last func -> List.append last (func(msg, channel))) [] funcs
 
-type public IrcBot(server : string, port, channel, nick, funcs, mode) =
-    member this.server = server
-    member this.port = port
-    member this.channel = channel
-    member this.nick = nick
-    member this.funcs = funcs
+let private wrapper func msg channel =
+    async {
+        return (func (msg, channel)
+                |> List.map messageToString)
+    }
+
+let private getStream (client : TcpClient) =
+    (new StreamReader(client.GetStream())),
+    (new StreamWriter(client.GetStream()))
+
+let silentPrint x =
+    printfn "%A" x
+    x
+
+type botDescription =
+    { server : string;
+      port : int;
+      channel : string;
+      botNick : string;
+      funcs : List<(Person * Message) option * string -> Message list>;
+      mode : botMode;
+      regular : List<DateTime -> Message list>}
+
+type public IrcBot(desc) =
+    let client = new TcpClient()        
+    do client.Connect(desc.server, desc.port)
+    do printfn "Connected!"
+
+    let ircReader, ircWriter = getStream client
+    do ircWriter.WriteLine (sprintf "USER %s %s %s %s" desc.botNick desc.botNick
+                                                       desc.botNick desc.botNick)
+    do ircWriter.AutoFlush <- true
+    do ircWriter.WriteLine(sprintf "NICK %s" desc.botNick)
+    do ircWriter.WriteLine(sprintf "JOIN %s" desc.channel)
+
+    member this.desc = desc
+    member this.ircClient = client
+    member this.reader = ircReader
+    member this.writer = ircWriter
+    //member this.cron () =
 
     member this.loop () =
-        let ircClient = new TcpClient()
-        ircClient.Connect(this.server, this.port)
-        
-        let ircReader = new StreamReader(ircClient.GetStream())
-        let ircWriter = new StreamWriter(ircClient.GetStream())
-
-        ircWriter.WriteLine(sprintf "USER %s %s %s %s" this.nick this.nick this.nick this.nick)
-        ircWriter.AutoFlush <- true
-        ircWriter.WriteLine(sprintf "NICK %s" this.nick)
-        ircWriter.WriteLine(sprintf "JOIN %s" this.channel)
-
-        let wrapper func msg channel =
-            async {
-                return (func (msg, channel)
-                       |> List.map messageToString)
-            }
-
         while ircReader.EndOfStream = false do
-            let line = ircReader.ReadLine ()
+            let line = this.reader.ReadLine ()
             printfn "%s" line
             
             let msg = ircParseMsg line
 
             if line.Contains "PING" then
-                ircPing ircWriter this.server
+                ircPing this.writer this.desc.server
 
             let stopwatch = System.Diagnostics.Stopwatch()
-            if mode.debug then
+            if this.desc.mode.debug then
                 stopwatch.Start()
 
-            if mode.order = Parallel then
-                List.map (fun func -> wrapper func msg channel) funcs
+            if this.desc.mode.order = Parallel then
+                List.map (fun func ->
+                          wrapper func msg this.desc.channel) this.desc.funcs
+                // TODO: remove this.desc.channel here
                 |> Async.Parallel
                 |> Async.RunSynchronously
                 |> Array.filter ((<>) [])
                 |> List.ofArray
                 |> List.concat
-                |> List.iter (fun (x : string) -> ircWriter.WriteLine(x))
+                |> List.iter (fun (x : string) -> this.writer.WriteLine(x))
             else
-                List.map (fun x -> x (msg, channel)) funcs
+                List.map (fun x -> x (msg, this.desc.channel)) this.desc.funcs
                 |> List.concat
                 |> List.map (fun x -> messageToString x)
-                |> List.iter (fun x -> ircWriter.WriteLine(x))
+                |> List.iter (fun x -> this.writer.WriteLine(x))
             
-            if mode.debug then
+            if this.desc.mode.debug then
                 stopwatch.Stop()
 
             printfn "(%f ms)" stopwatch.Elapsed.TotalMilliseconds

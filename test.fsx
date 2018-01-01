@@ -12,7 +12,7 @@ let (|Prefix|_|) (p : string) (s : string) =
     else
         None
 
-let test msg channel =
+let test(msg, channel) =
     match msg with
     | Some(_, { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
@@ -63,5 +63,12 @@ let channel = "#lor"
 let nick = "pidor-2"
 
 let funcs = [test]
-let myBot = new IrcBot(server, port, channel, nick, funcs, { order = Parallel; debug = false })
+let myBot = new IrcBot({ server = server;
+                         port = port;
+                         channel = channel;
+                         botNick = nick;
+                         funcs = funcs;
+                         mode = { order = Parallel;
+                                  debug = false };
+                         regular = []})
 myBot.loop ()

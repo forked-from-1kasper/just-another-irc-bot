@@ -5,9 +5,16 @@ open System
 
 let server = "chat.freenode.net"
 let port = 6667
-let channel = "##lorwiki"
+let channel = "#lor"
 let nick = "just-nothing"
 
 let funcs = []
-let myBot = new IrcBot(server, port, channel, nick, funcs, { order = Parallel; debug = false })
+let myBot = new IrcBot({ server = server;
+                         port = port;
+                         channel = channel;
+                         botNick = nick;
+                         funcs = funcs;
+                         mode = { order = Parallel;
+                                  debug = false };
+                         regular = []})
 myBot.loop ()
