@@ -162,5 +162,4 @@ type public IrcBot(desc) =
             
             if this.desc.mode.debug then
                 stopwatch.Stop()
-
-            printfn "(%f ms)" stopwatch.Elapsed.TotalMilliseconds
+                printfn "(%f ms)" stopwatch.Elapsed.TotalMilliseconds
