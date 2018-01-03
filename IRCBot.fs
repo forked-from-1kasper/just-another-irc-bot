@@ -1,6 +1,7 @@
 module IRCBot
 
 open System
+open System.Timers
 open System.IO
 open System.Net
 open System.Net.Sockets
@@ -93,6 +94,8 @@ let private simpleProcessing (writer : StreamWriter) =
     >> List.map messageToString
     >> List.iter (writeAndPrint writer)
 
+type AEvent =
+    Event of (DateTime -> Message list) * (DateTime -> bool)
 type botDescription =
     { server : string;
       port : int;
@@ -100,8 +103,8 @@ type botDescription =
       botNick : string;
       funcs : List<(Person * Message) option * string -> Message list>;
       mode : botMode;
-      regular : List<DateTime -> Message list>;
-      period : int}
+      regular : List<AEvent>;
+      period : float}
 
 type public IrcBot(desc) =
     let client = new TcpClient()        
@@ -121,19 +124,29 @@ type public IrcBot(desc) =
     member this.writer = ircWriter
 
     member this.cron () =
-        while true do
+        //while true do
+        let timerHandler () =
             let now = DateTime.Now
+            let goodFuncs =
+                this.desc.regular
+                |> List.filter (fun (Event (_, predicat)) -> predicat now)
+                |> List.map (fun (Event (func, _)) -> func)
     
             if this.desc.mode.order = Parallel then
-                List.map(fun func -> async {
+                goodFuncs
+                |> List.map(fun func -> async {
                                          return (func now
                                                  |> List.map messageToString)
-                                     }) this.desc.regular
+                                     })
                 |> parallelProcessing this.writer
             else
-                List.map(fun func -> func now) this.desc.regular
+                goodFuncs
+                |> List.map(fun func -> func now)
                 |> simpleProcessing this.writer
-            Thread.Sleep this.desc.period
+            //Thread.Sleep this.desc.period
+        let timer = new System.Timers.Timer(this.desc.period)
+        timer.Elapsed.Add(fun _ -> timerHandler ())
+        timer.Start ()
 
     member this.loop () =
         while ircReader.EndOfStream = false do
