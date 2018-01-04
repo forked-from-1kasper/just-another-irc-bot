@@ -22,7 +22,7 @@ constants:
 	echo Building IRCBot.Public.Constants
 	$(FSHARP) -a IRCBot.Public.Constants.fs
 
-modules: vote jokes title sample punto online
+modules: vote jokes title sample punto
 	echo [×] modules done
 
 vote:
@@ -48,10 +48,6 @@ sample: markov
 punto:
 	echo Building IRCBot.Modules.Punto
 	$(FSHARP) -a $(MUSTHAVE) IRCBot.Modules.Punto.fs
-
-online:
-	echo Building IRCBot.Modules.Online
-	$(FSHARP) -a $(MUSTHAVE) IRCBot.Modules.Online.fs
 
 clean:
 	rm IRCBot.dll

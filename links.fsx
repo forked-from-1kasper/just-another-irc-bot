@@ -9,6 +9,7 @@
 #r "IRCBot.Modules.Online.dll"
 #r "Markov.dll"
 
+open System.Text.RegularExpressions
 open IRCBot
 open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
@@ -22,9 +23,39 @@ open Markov
 
 open System
 
-//let funcs = [showLinksTitle;
-//             vote]
-let funcs = [vote]
+let regexp(msg, channel) =
+    match msg with
+    | Some({ nick = nick; ident = ident },
+           { command = "PRIVMSG"; args = [channel; text] }) ->
+        match text with
+        | Prefix "!regexp" rest ->
+            if lastMessages.ContainsKey nick then
+                match rest.Split ([| " // " |], StringSplitOptions.None) with
+                    | [| pattern; forReplace |] ->
+                        let toFix = lastMessages.[nick]
+                        let nowFixed = Regex.Replace(toFix, pattern, forReplace)
+                        let toPrint =
+                            sprintf ":%s хотел сказать: «%s»" nick nowFixed
+                        [{ command = "PRIVMSG";
+                           args = [ channel; toPrint ] }]
+                    | [| nickname; patter; forReplace |] ->
+                        let toFix = lastMessages.[nickname]
+                        let nowFixed = Regex.Replace(toFix, patter, forReplace)
+                        let toPrint =
+                            sprintf
+                                ":%s думает, что %s хотел сказать: «%s»"
+                                nick nickname nowFixed
+                        [{ command = "PRIVMSG";
+                           args = [ channel; toPrint ] }]
+                    | _ -> []
+            else []
+        | _ -> []
+    | _ -> []
+
+let funcs = [showLinksTitle;
+             vote;
+             bindAsyncFunctions [regexp; saveLastMessage]]
+//let funcs = [vote]
 
 let channel = "#lor"
 
