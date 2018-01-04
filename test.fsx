@@ -12,19 +12,19 @@ let (|Prefix|_|) (p : string) (s : string) =
     else
         None
 
-let test(msg, channel) =
+let test(msg, _) =
     match msg with
     | Some(_, { command = "PRIVMSG"; args = [channel; text] }) ->
         match text with
-        | Prefix "!version" rest ->
+        | Prefix "!version" _ ->
             [{ command = "PRIVMSG";
                args = [ channel;
                         sprintf ":I on %A" Environment.Version ] }]
-        | Prefix "!date" rest ->
+        | Prefix "!date" _ ->
             [{ command = "PRIVMSG";
                args = [ channel;
                         sprintf ":%A" System.DateTime.Now ] }]
-        | Prefix "!help" rest ->
+        | Prefix "!help" _ ->
             [{ command = "PRIVMSG";
                args = [ channel;
                         ":Google it!" ] }]
@@ -53,23 +53,23 @@ let test(msg, channel) =
         | s when s.Contains " - " ->
             [{ command = "PRIVMSG";
                args = [ channel;
-                        ":Сдохни, тварь!" ] }]
+                        ":Ой!" ] }]
         | _ -> []
     | _ -> []
 
 let server = "chat.freenode.net"
 let port = 6667
 let channel = "#lor"
-let nick = "pidor-2"
+let nick = "mylittlepony"
 
 let funcs = [test]
-let myBot = new IrcBot({ server = server;
-                         port = port;
-                         channel = channel;
-                         botNick = nick;
-                         funcs = funcs;
-                         mode = { order = Parallel;
-                                  debug = false };
-                         regular = [];
-                         period = 1000})
+let myBot = IrcBot({ server = server;
+                     port = port;
+                     channel = channel;
+                     botNick = nick;
+                     funcs = funcs;
+                     mode = { order = Parallel;
+                              debug = false };
+                     regular = [];
+                     period = 1000.0})
 myBot.loop ()
