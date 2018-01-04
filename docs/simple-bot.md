@@ -19,32 +19,32 @@ GNU Make and git.
 # Installation
 
 Clone repository:
-```
+```bash
 git clone https://github.com/forked-from-1kasper/just-another-irc-bot
 ```
 
 If you have Linux or macOS: open Makefile and change `FSHARP=fsc` to `FSHARP=fsharpc`.
 
 Make all:
-```
+```bash
 make
 ```
 
 # Writing
 Make a file:
-```
+```bash
 touch mybot.fsx
 ```
 
 Write to the top:
-```
+```fsharp
 #r "IRCBot.dll"
 
 open IRCBot
 ```
 
 Specify the server, port, bot nickname, and the channel to which it will connect at startup:
-```
+```fsharp
 let server = "chat.freenode.net"
 let port = 6667
 
@@ -66,7 +66,7 @@ let myBot = IrcBot({ server = server;
 ```
 
 Run it:
-```
+```fsharp
 myBot.loop ()
 ```
 
@@ -74,7 +74,7 @@ myBot.loop ()
 Now the bot does nothing.
 
 Make a function:
-```
+```fsharp
 // the second argument appeared as a result of an erruneous desing and will be removed. Do not use it.
 let test(msg, _) =
     match msg with
@@ -97,7 +97,7 @@ Now if we write “ping”, the bot will respond with “pong” and “pong-2�
 # Regular functions
 Make a function:
 
-```
+```fsharp
 // this is some event
 let timingEvent =
     // this is what happens
