@@ -20,20 +20,20 @@ GNU Make and git.
 
 Clone repository:
 ```bash
-git clone https://github.com/forked-from-1kasper/just-another-irc-bot
+$ git clone https://github.com/forked-from-1kasper/just-another-irc-bot
 ```
 
 If you have Linux or macOS: open Makefile and change `FSHARP=fsc` to `FSHARP=fsharpc`.
 
 Make all:
 ```bash
-make
+$ make
 ```
 
 # Writing
 Make a file:
 ```bash
-touch mybot.fsx
+$ touch mybot.fsx
 ```
 
 Write to the top:
@@ -65,9 +65,15 @@ let myBot = IrcBot({ server = server;
                      period = 1000.0 })
 ```
 
-Run it:
+Add it:
 ```fsharp
 myBot.loop ()
+```
+
+And run it:
+```bash
+$ fsi mybot.fsx # for Windows
+$ fsharpi mybot.fsx # for Linux, macOS
 ```
 
 # Functions
