@@ -29,6 +29,10 @@ Make all:
 ```bash
 $ make
 ```
+Or you can make only IRCBot.dll:
+```bash
+$ make core
+```
 
 # Writing
 Make a file:
@@ -53,7 +57,7 @@ let nick = "just-nothing"
 ```
 
 Initialize the bot:
-```
+```fsharp
 let myBot = IrcBot({ server = server;
                      port = port;
                      channel = channel;
@@ -81,12 +85,11 @@ Now the bot does nothing.
 
 Make a function:
 ```fsharp
-// the second argument appeared as a result of an erruneous desing and will be removed. Do not use it.
-let test(msg, _) =
+let test(msg) =
     match msg with
     // we get: information about the user (nickname and ident), information about the message (here: command, channel, and text)
-    | Some({ nick = nick; ident = ident },
-           { command = "PRIVMSG"; args = [ channel; text ] }) ->
+    | Some { nick = nick; ident = ident },
+      Some { command = "PRIVMSG"; args = [ channel; text ] } ->
            if text = "ping" then
                // we send: command, channel, and text
                [{ command = "PRIVMSG";
@@ -121,7 +124,7 @@ let timingEvent =
 
 Replace `regular = []` with `regular = [timingEvent]`.
 Period is 1000 milliseconds (1 second): `period = 1000.0`.
-Before `myBot.loop ()`, add `myBot.cron ()`.
+Before `myBot.Loop ()`, add `myBot.Cron ()`.
 
 Now the bot sends time every second.
 Every second the bot checks the events and launches, if necessary.

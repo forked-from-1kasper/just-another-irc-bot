@@ -8,20 +8,20 @@ open IRCBot.Public.Prefix
 
 open System
 
-let sample(msg, channel) =
+let sample(msg) =
     match msg with
-    | Some({ nick = "awesomelackware" },
-           { command = "PRIVMSG"; args = [_; "!die"] }) ->
+    | Some { nick = "awesomelackware" },
+      Some { command = "PRIVMSG"; args = [_; "!die"] } ->
         [{ command = "QUIT"; args = [] }]
 
-    | Some (_, { command = "PRIVMSG"; args = [nickArg; text] })
+    | _, Some { command = "PRIVMSG"; args = [nickArg; text] }
       when nickArg = botNick ->
         [{ command = "PRIVMSG";
            args = [ channel;
                     sprintf ":%s" (degenerate ()) ] }]
 
-    | Some({ nick = someNick },
-           { command = "PRIVMSG"; args = [channel; text] }) ->
+    | Some { nick = someNick },
+      Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!join" newChannel ->
             if someNick = "awesomelackware" then

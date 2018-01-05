@@ -16,5 +16,5 @@ let myBot = IrcBot({ server = server;
                      mode = { order = Parallel;
                               debug = false };
                      regular = [];
-                      period = 1000.0})
-myBot.loop ()
+                     period = 1000.0})
+myBot.Loop ()

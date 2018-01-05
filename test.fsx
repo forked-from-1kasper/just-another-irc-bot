@@ -12,9 +12,9 @@ let (|Prefix|_|) (p : string) (s : string) =
     else
         None
 
-let test(msg, _) =
+let test(msg) =
     match msg with
-    | Some(_, { command = "PRIVMSG"; args = [channel; text] }) ->
+    | _, Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!version" _ ->
             [{ command = "PRIVMSG";
@@ -72,4 +72,4 @@ let myBot = IrcBot({ server = server;
                               debug = false };
                      regular = [];
                      period = 1000.0})
-myBot.loop ()
+myBot.Loop ()

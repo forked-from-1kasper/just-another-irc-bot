@@ -40,10 +40,10 @@ let fixLayout s =
 
 let mutable (lastMessages : Map<string, string>) = [] |> Map.ofList
 
-let punto(msg, channel) =
+let punto(msg) =
     match msg with
-    | Some({ nick = nick; ident = ident },
-           { command = "PRIVMSG"; args = [channel; text] }) ->
+    | Some { nick = nick; ident = ident },
+      Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!fix" _ ->
             if lastMessages.ContainsKey nick then
@@ -54,10 +54,10 @@ let punto(msg, channel) =
         | _ -> []
     | _ -> []
 
-let saveLastMessage(msg, channel) =
+let saveLastMessage(msg) =
     match msg with
-    | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [_; text] }) -> // FIXME: ignoring channel!
+    | Some { nick = nick },
+      Some { command = "PRIVMSG"; args = [_; text] } -> // FIXME: ignoring channel!
         lastMessages <- Map.add nick text lastMessages
         []
     | _ -> []

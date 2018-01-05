@@ -36,15 +36,15 @@ let timingEvent =
                    sprintf ":%A" time] }]
     Event (timing, fun _ -> true)
 
-let myBot = new IrcBot ({ server = server;
-                          port = port;
-                          channel = channel;
-                          botNick = botNick;
-                          funcs = funcs;
-                          mode = { order = Parallel;
-                                   debug = true };
-                          regular = [timingEvent];
-                          period = 1000.0})
+let myBot = IrcBot ({ server = server;
+                      port = port;
+                      channel = channel;
+                      botNick = botNick;
+                      funcs = funcs;
+                      mode = { order = Parallel;
+                               debug = true };
+                      regular = [timingEvent];
+                      period = 1000.0})
 
 let public saveDBAsync (sleepTime : int) =
     async {
@@ -57,8 +57,8 @@ let public saveDBAsync (sleepTime : int) =
         return ()
     }
 
-myBot.cron ()
+myBot.Cron ()
 let asynced f = async { f () }
-[ asynced myBot.loop; (saveDBAsync 5000) ]
+[ asynced myBot.Loop; (saveDBAsync 5000) ]
 |> Async.Parallel
 |> Async.RunSynchronously

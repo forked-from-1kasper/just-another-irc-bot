@@ -4,10 +4,10 @@ open IRCBot
 open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
 
-let isGay(msg, channel) =
+let isGay(msg) =
     match msg with
-    | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [channel; text] }) ->
+    | Some { nick = nick },
+      Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!isGay" rest ->
             let isPidoras = function
@@ -20,19 +20,19 @@ let isGay(msg, channel) =
         | _ -> []
     | _ -> []
 
-let SIEGHEIL(msg, channel) =
+let SIEGHEIL(msg) =
     match msg with
-    | Some({ nick = nick },
-           { command = "JOIN"; args = [channel] }) when nick <> botNick ->
+    | Some { nick = nick },
+      Some { command = "JOIN"; args = [channel] } when nick <> botNick ->
         [{ command = "PRIVMSG";
            args = [ channel;
                     sprintf ":%s: ты гей" nick ]}]
     | _ -> []
 
-let sorry(msg, channel) =
+let sorry(msg) =
     match msg with
-    | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [channel; text] }) ->
+    | Some { nick = nick },
+      Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!пожалеть" _ ->
             [{ command = "PRIVMSG";
@@ -48,10 +48,10 @@ let sorry(msg, channel) =
         | _ -> []
     | _ -> []
 
-let admin(msg, channel) =
+let admin(msg) =
     match msg with
-    | Some({ nick = nick },
-           { command = "PRIVMSG"; args = [channel; text] }) when
+    | Some { nick = nick },
+      Some { command = "PRIVMSG"; args = [channel; text] } when
       List.contains nick ["awesomelackware"; "timdorohin"] ->
           match text with
           | Prefix "!дайодменку" _ ->

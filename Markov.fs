@@ -105,9 +105,9 @@ let public trigger = ["ты"; "python"; "блядь";
                       "мамбет"; "#"; "геи";
                       "гей"; "пидор"; "пидорас"]
 
-let public learn(msg, channel) =
+let public learn(msg) =
     match msg with
-    | Some(_, { command = "PRIVMSG"; args = [_; text] }) ->
+    | _, Some { command = "PRIVMSG"; args = [_; text] } ->
         if (text.Contains botNick |> not) &&
            (text.StartsWith "!" |> not) then
             let textWithoutNick =

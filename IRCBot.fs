@@ -1,12 +1,9 @@
 module IRCBot
 
 open System
-open System.Timers
 open System.IO
-open System.Net
 open System.Net.Sockets
 open System.Text.RegularExpressions
-open System.Threading
 
 type Person = { nick : string;
                 ident : string}
@@ -17,7 +14,7 @@ type Message = { command : string;
 type VesitorMessage = Person * Message
 
 type Order = Parallel | Consistently
-type botMode =
+type BotMode =
     { order: Order;
       debug : bool }
 
@@ -33,7 +30,7 @@ let private ircGetMsg (line : string) =
     line.Substring(line.Substring(1).IndexOf(":") + 2)
 
 let private ircParseMsg (line : string) =
-    let rx = new Regex(@":(\S+)!(\S+) (\S+) (\S+) ?:?(.*)")
+    let rx = Regex(@":(\S+)!(\S+) (\S+) (\S+) ?:?(.*)")
     //                     nick!ident comnd chan  teeeext
 
     let matches = rx.Match line
@@ -46,12 +43,12 @@ let private ircParseMsg (line : string) =
             else
                 [ values.[3]; text ]
         
-        Some ({ nick = values.[0];
+        (Some { nick = values.[0];
                 ident = values.[1] },
-              { command = values.[2];
+         Some { command = values.[2];
                 args = args })
     else
-        None
+        None, None
 
 let private messageToString { command = command;
                               args = args} =
@@ -60,12 +57,12 @@ let private messageToString { command = command;
     sprintf "%s %s" command concated
 
 let public bindAsyncFunctions(funcs) =
-    fun (msg, channel) ->
-        List.fold (fun last func -> List.append last (func(msg, channel))) [] funcs
+    fun (msg) ->
+        List.fold (fun last func -> List.append last (func (msg))) [] funcs
 
-let private wrapper func msg channel =
+let private wrapper func msg =
     async {
-        return (func (msg, channel)
+        return (func msg
                 |> List.map messageToString)
     }
 
@@ -96,18 +93,18 @@ let private simpleProcessing (writer : StreamWriter) =
 
 type AEvent =
     Event of (DateTime -> Message list) * (DateTime -> bool)
-type botDescription =
+type BotDescription =
     { server : string;
       port : int;
       channel : string;
       botNick : string;
-      funcs : List<(Person * Message) option * string -> Message list>;
-      mode : botMode;
+      funcs : List<(Person option * Message option) -> Message list>;
+      mode : BotMode;
       regular : List<AEvent>;
       period : float}
 
 type public IrcBot(desc) =
-    let client = new TcpClient()        
+    let client = new TcpClient()
     do client.Connect(desc.server, desc.port)
     do printfn "Connected!"
 
@@ -118,61 +115,61 @@ type public IrcBot(desc) =
     do ircWriter.WriteLine(sprintf "NICK %s" desc.botNick)
     do ircWriter.WriteLine(sprintf "JOIN %s" desc.channel)
 
-    member this.desc = desc
-    member this.ircClient = client
-    member this.reader = ircReader
-    member this.writer = ircWriter
+    member __.Desc = desc
+    member __.IrcClient = client
+    member __.Reader = ircReader
+    member __.Writer = ircWriter
 
-    member this.cron () =
+    member this.Cron () =
         //while true do
         let timerHandler () =
             let now = DateTime.Now
             let goodFuncs =
-                this.desc.regular
+                this.Desc.regular
                 |> List.filter (fun (Event (_, predicat)) -> predicat now)
                 |> List.map (fun (Event (func, _)) -> func)
     
-            if this.desc.mode.order = Parallel then
+            if this.Desc.mode.order = Parallel then
                 goodFuncs
                 |> List.map(fun func -> async {
                                          return (func now
                                                  |> List.map messageToString)
                                      })
-                |> parallelProcessing this.writer
+                |> parallelProcessing this.Writer
             else
                 goodFuncs
                 |> List.map(fun func -> func now)
-                |> simpleProcessing this.writer
+                |> simpleProcessing this.Writer
             //Thread.Sleep this.desc.period
-        let timer = new System.Timers.Timer(this.desc.period)
+        let timer = new System.Timers.Timer(this.Desc.period)
         timer.Elapsed.Add(fun _ -> timerHandler ())
         timer.Start ()
 
-    member this.loop () =
-        while ircReader.EndOfStream = false do
-            let line = this.reader.ReadLine ()
+    member this.Loop () =
+        while not this.Reader.EndOfStream do
+            let line = this.Reader.ReadLine ()
             printfn "- %s" line
             
             let msg = ircParseMsg line
 
             if line.StartsWith "PING" then
                 match (line.Split [| ' ' |] |> List.ofArray) with
-                    | ["PING"; server] -> ircPing this.writer server // server must be without spaces
+                    | ["PING"; server] -> ircPing this.Writer server // server must be without spaces
                     | _ -> ()
 
             let stopwatch = System.Diagnostics.Stopwatch()
-            if this.desc.mode.debug then
+            if this.Desc.mode.debug then
                 stopwatch.Start()
 
-            if this.desc.mode.order = Parallel then
+            if this.Desc.mode.order = Parallel then
                 List.map (fun func ->
-                          wrapper func msg this.desc.channel) this.desc.funcs
+                          wrapper func msg) this.Desc.funcs
                 // TODO: remove this.desc.channel here
-                |> parallelProcessing this.writer
+                |> parallelProcessing this.Writer
             else
-                List.map (fun x -> x (msg, this.desc.channel)) this.desc.funcs
-                |> simpleProcessing this.writer
+                List.map (fun x -> x msg) this.Desc.funcs
+                |> simpleProcessing this.Writer
             
-            if this.desc.mode.debug then
+            if this.Desc.mode.debug then
                 stopwatch.Stop()
                 printfn "(%f ms)" stopwatch.Elapsed.TotalMilliseconds

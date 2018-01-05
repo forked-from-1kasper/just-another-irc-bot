@@ -18,10 +18,10 @@ let mutable private options = [(([("0.1", 0);
 let mutable (alreadyVoted : List<int * string>) = []
 
 let private help = ":!results номер; !vote номер/вариант; !question номер; !newquestion вопрос/вариант1 вариант2 …; !removequestion номер; !allquestions;"
-let public vote(msg, channel) =
+let public vote(msg) =
     match msg with
-    | Some({ ident = ident; nick = nick },
-           { command = "PRIVMSG"; args = [channel; text] }) ->
+    | Some { nick = nick; ident = ident },
+      Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!results" optionString ->
             match Int32.TryParse optionString with

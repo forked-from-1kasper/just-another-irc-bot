@@ -21,10 +21,10 @@ open Markov
 
 open System
 
-let regexp(msg, channel) =
+let regexp(msg) =
     match msg with
-    | Some({ nick = nick; ident = ident },
-           { command = "PRIVMSG"; args = [channel; text] }) ->
+    | Some { nick = nick },
+      Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!regexp" rest ->
             if lastMessages.ContainsKey nick then
@@ -101,14 +101,14 @@ let showTimeEvent =
         (time.Minute = 0 || time.Minute = 30) && (time.Second = 0)
     Event (showTime, showTimePredicat)
 
-let myBot = new IrcBot({server = server;
-                        port = port;
-                        channel = channel;
-                        botNick = botNick;
-                        funcs = funcs;
-                        mode = { order = Parallel; debug = false };
-                        regular = [showTimeEvent];
-                        period = 1000.0})
+let myBot = IrcBot({server = server;
+                    port = port;
+                    channel = channel;
+                    botNick = botNick;
+                    funcs = funcs;
+                    mode = { order = Parallel; debug = false };
+                    regular = [showTimeEvent];
+                    period = 1000.0})
 
-myBot.cron ()
-myBot.loop ()
+myBot.Cron ()
+myBot.Loop ()
