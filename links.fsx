@@ -13,47 +13,47 @@ open IRCBot
 open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
 open IRCBot.Modules.Vote
-open IRCBot.Modules.Jokes
 open IRCBot.Modules.Title
-open IRCBot.Modules.Sample
 open IRCBot.Modules.Punto
-open Markov
 
 open System
 
-let regexp(msg) =
-    match msg with
-    | Some { nick = nick },
-      Some { command = "PRIVMSG"; args = [channel; text] } ->
+let regexp(msg) = chat {
+    let! (userInfo, msgInfo) =
+        match msg with
+        | Some userInfo', Some msgInfo' -> Some (userInfo', msgInfo')
+        | _ -> None
+    let! (channel, text) =
+        match msgInfo.args with
+        | [channel'; text'] -> Some (channel', text')
+        | _ -> None
+    
+    let! result =
         match text with
         | Prefix "!regexp" rest ->
-            if lastMessages.ContainsKey nick then
-                match rest.Split ([| " // " |], StringSplitOptions.None) with
-                    | [| pattern; forReplace |] ->
-                        let toFix = lastMessages.[nick]
-                        let nowFixed = Regex.Replace(toFix, pattern, forReplace)
-                        let toPrint =
-                            sprintf ":%s хотел сказать: «%s»" nick nowFixed
-                        [{ command = "PRIVMSG";
-                           args = [ channel; toPrint ] }]
-                    | [| nickname; patter; forReplace |] ->
-                        let toFix = lastMessages.[nickname]
-                        let nowFixed = Regex.Replace(toFix, patter, forReplace)
-                        let toPrint =
-                            sprintf
-                                ":%s думает, что %s хотел сказать: «%s»"
-                                nick nickname nowFixed
-                        [{ command = "PRIVMSG";
-                           args = [ channel; toPrint ] }]
-                    | _ -> []
-            else []
-        | _ -> []
-    | _ -> []
+            match rest.Split ([| " / " |], StringSplitOptions.None) with
+            | [| pattern; forReplace |] ->
+                if lastMessages.ContainsKey userInfo.nick then
+                    let toFix = lastMessages.[userInfo.nick]
+                    let nowFixed = Regex.Replace(toFix, pattern, forReplace)
+                    Some (sprintf ":%s хотел сказать: «%s»" userInfo.nick nowFixed)
+                else None
+            | [| nick; pattern; forReplace |] ->
+                if lastMessages.ContainsKey nick then
+                    let toFix = lastMessages.[nick]
+                    let nowFixed = Regex.Replace(toFix, pattern, forReplace)
+                    Some (sprintf ":%s думает, что %s хотел сказать: «%s»" userInfo.nick nick nowFixed)
+                else None
+            | _ -> None
+        | _ -> None
+
+    return [{ command = "PRIVMSG";
+              args = [ channel; result ] }]
+}
 
 let funcs = [showLinksTitle;
              vote;
              bindAsyncFunctions [regexp; saveLastMessage]]
-//let funcs = [vote]
 
 let channel = "#lor"
 

@@ -173,3 +173,11 @@ type public IrcBot(desc) =
             if this.Desc.mode.debug then
                 stopwatch.Stop()
                 printfn "(%f ms)" stopwatch.Elapsed.TotalMilliseconds
+
+type ChatBuilder() =
+    member __.Return(v) = v
+    member __.Bind (v, f) =
+        match v with
+        | Some v' -> f v'
+        | None -> []
+let chat = ChatBuilder()
