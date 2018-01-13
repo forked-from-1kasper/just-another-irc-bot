@@ -55,7 +55,7 @@ let funcs = [showLinksTitle;
              vote;
              bindAsyncFunctions [regexp; saveLastMessage]]
 
-let channel = "#lor"
+let channel = "#borsch"
 
 let showHour =
     [ "полночь";
