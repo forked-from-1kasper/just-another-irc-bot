@@ -18,6 +18,12 @@ let getTitle (link : string) =
                 printfn "Unhandled Exception: %s" ex.Message
                 None
 
+let internal notAllowedEnds = [ ".png"; ".jpg"; ".rar"; ".gif"; ".gz" ]
+let internal notHasNotAllowedEnd (s : string) =
+    let rec support = function
+    | x :: xs -> if s.EndsWith x then false else support xs
+    | [] -> true
+    support notAllowedEnds
 let showLinksTitle(msg) =
     match msg with
     | _, Some { command = "PRIVMSG"; args = [channel; text] } ->
@@ -25,7 +31,8 @@ let showLinksTitle(msg) =
         |> List.ofArray
         |> List.filter (fun s ->
                         (s.StartsWith "http://" ||
-                         s.StartsWith "https://"))
+                         s.StartsWith "https://") &&
+                        notHasNotAllowedEnd s)
         |> List.map getTitle
         |> List.filter (fun x -> x.IsSome)
         |> List.map (fun x -> x.Value)
