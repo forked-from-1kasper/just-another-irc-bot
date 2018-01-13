@@ -52,10 +52,14 @@ let admin(msg) =
     match msg with
     | Some { nick = nick },
       Some { command = "PRIVMSG"; args = [channel; text] } when
-      List.contains nick ["awesomelackware"; "timdorohin"] ->
+      List.contains nick ["awesomelackware"; "timdorohin";
+                          "Bratishka"; "slaykovsky"] ->
           match text with
-          | Prefix "!дайодменку" _ ->
+          | Prefix "!+v" _ ->
               [{ command = "MODE";
-                 args = [ channel; "+o"; nick ] }]
+                 args = [ channel; "+v"; nick ] }]
+          | Prefix "!-v" _ ->
+              [{ command = "MODE";
+                 args = [ channel; "-v"; nick ] }]
           | _ -> []
     | _ -> []

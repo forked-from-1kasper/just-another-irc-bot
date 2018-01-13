@@ -15,6 +15,7 @@ open IRCBot.Public.Constants
 open IRCBot.Modules.Vote
 open IRCBot.Modules.Title
 open IRCBot.Modules.Punto
+open IRCBot.Modules.Jokes
 
 open System
 
@@ -53,7 +54,8 @@ let regexp(msg) = chat {
 
 let funcs = [showLinksTitle;
              vote;
-             bindAsyncFunctions [regexp; saveLastMessage]]
+             bindAsyncFunctions [regexp; saveLastMessage];
+             admin]
 
 let channel = "#borsch"
 
