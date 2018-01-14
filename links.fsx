@@ -19,6 +19,9 @@ open IRCBot.Modules.Jokes
 
 open System
 
+let channel = "#borsch"
+let botNick = "NurNochMal"
+
 let regexp(msg) = chat {
     let! (userInfo, msgInfo) =
         match msg with
@@ -52,13 +55,6 @@ let regexp(msg) = chat {
               args = [ channel; result ] }]
 }
 
-let loggerWriter(msg) =
-    printfn "%A" msg
-    []
-
-
-let channel = "#borsch"
-
 let showHour =
     [ "полночь";
       "час ночи";
@@ -81,7 +77,7 @@ let showHour =
       "шесть часов вечера";
       "семь часов вечера";
       "восемь часов вечера";
-      "девять часов вечере";
+      "девять часов вечера";
       "десять часов вечера";
       "одиннадцать часов вечера"]
 
@@ -110,8 +106,7 @@ let myBot = IrcBot({server = server;
                     funcs = [showLinksTitle;
                              vote;
                              bindAsyncFunctions [regexp; saveLastMessage];
-                             admin;
-                             loggerWriter];
+                             admin];
                     mode = { order = Parallel; debug = false };
                     regular = [showTimeEvent];
                     period = 1000.0})
