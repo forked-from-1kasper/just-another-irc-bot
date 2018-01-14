@@ -20,15 +20,6 @@ let isGay(msg) =
         | _ -> []
     | _ -> []
 
-let SIEGHEIL(msg) =
-    match msg with
-    | Some { nick = nick },
-      Some { command = "JOIN"; args = [channel] } when nick <> botNick ->
-        [{ command = "PRIVMSG";
-           args = [ channel;
-                    sprintf ":%s: ты гей" nick ]}]
-    | _ -> []
-
 let sorry(msg) =
     match msg with
     | Some { nick = nick },

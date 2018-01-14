@@ -52,10 +52,10 @@ let regexp(msg) = chat {
               args = [ channel; result ] }]
 }
 
-let funcs = [showLinksTitle;
-             vote;
-             bindAsyncFunctions [regexp; saveLastMessage];
-             admin]
+let loggerWriter(msg) =
+    printfn "%A" msg
+    []
+
 
 let channel = "#borsch"
 
@@ -107,7 +107,11 @@ let myBot = IrcBot({server = server;
                     port = port;
                     channel = channel;
                     botNick = botNick;
-                    funcs = funcs;
+                    funcs = [showLinksTitle;
+                             vote;
+                             bindAsyncFunctions [regexp; saveLastMessage];
+                             admin;
+                             loggerWriter];
                     mode = { order = Parallel; debug = false };
                     regular = [showTimeEvent];
                     period = 1000.0})

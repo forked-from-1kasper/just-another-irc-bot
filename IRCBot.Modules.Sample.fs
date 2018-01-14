@@ -13,13 +13,6 @@ let sample(msg) =
     | Some { nick = "awesomelackware" },
       Some { command = "PRIVMSG"; args = [_; "!die"] } ->
         [{ command = "QUIT"; args = [] }]
-
-    | _, Some { command = "PRIVMSG"; args = [nickArg; text] }
-      when nickArg = botNick ->
-        [{ command = "PRIVMSG";
-           args = [ channel;
-                    sprintf ":%s" (degenerate ()) ] }]
-
     | Some { nick = someNick },
       Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
@@ -43,10 +36,6 @@ let sample(msg) =
             [{ command = "PRIVMSG";
                args = [ channel;
                         sprintf ":%s" rest ] }]
-        | Prefix botNick _ ->
-            [{ command = "PRIVMSG";
-               args = [ channel;
-                        sprintf ":%s" (degenerate ()) ]} ]
         | s when (List.map s.Contains trigger
                   |> List.exists ((=) true)) ->
             [{ command = "PRIVMSG";
