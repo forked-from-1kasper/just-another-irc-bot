@@ -20,7 +20,6 @@ open IRCBot.Modules.Jokes
 open System
 
 let channel = "#borsch"
-let botNick = "NurNochMal"
 
 let regexp(msg) = chat {
     let! (userInfo, msgInfo) =
@@ -102,8 +101,8 @@ let showTimeEvent =
 let myBot = IrcBot({server = server;
                     port = port;
                     channel = channel;
-                    botNick = botNick;
-                    ident = "yourmom";
+                    botNick = "NurNochMal";
+                    ident = "frei";
                     funcs = [showLinksTitle;
                              vote;
                              bindAsyncFunctions [regexp; saveLastMessage];

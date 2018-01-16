@@ -110,10 +110,11 @@ type public IrcBot(desc) =
     do printfn "Connected!"
 
     let ircReader, ircWriter = getStream client
-    do ircWriter.WriteLine (sprintf "USER %s %s NOTUSED %s" desc.botNick desc.ident
-                                                            desc.botNick)
     do ircWriter.AutoFlush <- true
     do ircWriter.WriteLine(sprintf "NICK %s" desc.botNick)
+    do ircWriter.WriteLine (sprintf "USER %s %s %s %s" desc.ident desc.ident
+                                                       desc.ident desc.ident)
+
     do ircWriter.WriteLine(sprintf "JOIN %s" desc.channel)
 
     member __.Desc = desc
