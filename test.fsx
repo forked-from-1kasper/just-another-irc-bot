@@ -61,12 +61,14 @@ let server = "chat.freenode.net"
 let port = 6667
 let channel = "#lor"
 let nick = "mylittlepony"
+let ident = "pony"
 
 let funcs = [test]
 let myBot = IrcBot({ server = server;
                      port = port;
                      channel = channel;
                      botNick = nick;
+                     ident = ident;
                      funcs = funcs;
                      mode = { order = Parallel;
                               debug = false };

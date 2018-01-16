@@ -103,6 +103,7 @@ let myBot = IrcBot({server = server;
                     port = port;
                     channel = channel;
                     botNick = botNick;
+                    ident = "yourmom";
                     funcs = [showLinksTitle;
                              vote;
                              bindAsyncFunctions [regexp; saveLastMessage];

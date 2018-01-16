@@ -21,10 +21,14 @@ open Markov
 open System
 
 //all: [showLinksTitle; sorry; SIEGHEIL; sample; vote; punto; saveLastMessage; zogControl]
+
+let botNick = "sample"
+let ident = "sample"
+let channel = "#lor"
+
 let funcs = [showLinksTitle;
              vote;
              admin;
-             SIEGHEIL;
              sample;
              learn;
              bindAsyncFunctions [punto; saveLastMessage]]
@@ -40,6 +44,7 @@ let myBot = IrcBot ({ server = server;
                       port = port;
                       channel = channel;
                       botNick = botNick;
+                      ident = ident;
                       funcs = funcs;
                       mode = { order = Parallel;
                                debug = true };

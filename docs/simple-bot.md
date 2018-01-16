@@ -54,6 +54,7 @@ let port = 6667
 
 let channel = "#lor"
 let nick = "just-nothing"
+let ident = "just-ident"
 ```
 
 Initialize the bot:
@@ -62,6 +63,7 @@ let myBot = IrcBot({ server = server;
                      port = port;
                      channel = channel;
                      botNick = nick;
+                     ident = ident;
                      funcs = [];
                      mode = { order = Parallel;
                               debug = false };
