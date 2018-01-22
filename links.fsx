@@ -20,6 +20,24 @@ open IRCBot.Modules.Jokes
 open System
 
 let channel = "#borsch"
+let botNick = "NurNochMal"
+
+let safeJoin(msg) = chat {
+    let! (userInfo, msgInfo) =
+        match msg with
+        | Some userInfo', Some msgInfo' -> Some (userInfo', msgInfo')
+        | _ -> None
+
+    let! text =
+        match msgInfo.args with
+        | [_; text'] -> Some text'
+        | _ -> None
+    
+    return (if text.StartsWith "You are now identified for" &&
+               userInfo.nick = "NickServ" then
+               [join channel]
+            else [])
+}
 
 let regexp(msg) = chat {
     let! (userInfo, msgInfo) =
@@ -99,19 +117,23 @@ let showTimeEvent =
     Event (showTime, showTimePredicat)
 
 do printf "Password: "
+let sendPassword = { command = "PRIVMSG";
+                     args = [ "NickServ";
+                              sprintf ":identify %s" <| Console.ReadLine () ] }
 
 let myBot = IrcBot({ server = server;
                      port = port;
-                     botNick = "NurNochMal";
+                     botNick = botNick;
                      ident = "frei";
                      funcs = [ showLinksTitle;
                                vote;
                                bindAsyncFunctions [regexp; saveLastMessage];
-                               admin ];
+                               admin;
+                               safeJoin ];
                      mode = { order = Parallel; debug = false };
                      regular = [ showTimeEvent ];
                      period = 1000.0;
-                     atStart = [ join channel ] })
+                     atStart = [ sendPassword ] })
 
 myBot.Cron ()
 myBot.Loop ()
