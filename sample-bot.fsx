@@ -9,7 +9,6 @@
 #r "Markov.dll"
 
 open IRCBot
-open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
 open IRCBot.Modules.Vote
 open IRCBot.Modules.Jokes
@@ -17,8 +16,6 @@ open IRCBot.Modules.Title
 open IRCBot.Modules.Sample
 open IRCBot.Modules.Punto
 open Markov
-
-open System
 
 //all: [showLinksTitle; sorry; SIEGHEIL; sample; vote; punto; saveLastMessage; zogControl]
 
