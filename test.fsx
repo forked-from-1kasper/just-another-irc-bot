@@ -66,12 +66,12 @@ let ident = "pony"
 let funcs = [test]
 let myBot = IrcBot({ server = server;
                      port = port;
-                     channel = channel;
                      botNick = nick;
                      ident = ident;
                      funcs = funcs;
                      mode = { order = Parallel;
                               debug = false };
                      regular = [];
-                     period = 1000.0})
+                     period = 1000.0;
+                     atStart = [ join channel ] })
 myBot.Loop ()

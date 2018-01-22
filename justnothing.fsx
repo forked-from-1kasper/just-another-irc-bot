@@ -4,17 +4,15 @@ open IRCBot
 
 let server = "chat.freenode.net"
 let port = 6667
-let channel = "#lor"
 let nick = "just-nothing"
-
-let funcs = []
 let myBot = IrcBot({ server = server;
                      port = port;
-                     channel = channel;
                      botNick = nick;
-                     funcs = funcs;
-                     mode = { order = Parallel;
+                     ident = "nothing";
+                     funcs = [];
+                     mode = { order = Consistently;
                               debug = false };
                      regular = [];
-                     period = 1000.0})
+                     period = 1000.0;
+                     atStart = [] })
 myBot.Loop ()

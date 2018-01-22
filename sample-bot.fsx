@@ -42,14 +42,14 @@ let timingEvent =
 
 let myBot = IrcBot ({ server = server;
                       port = port;
-                      channel = channel;
                       botNick = botNick;
                       ident = ident;
                       funcs = funcs;
                       mode = { order = Parallel;
                                debug = true };
                       regular = [timingEvent];
-                      period = 1000.0})
+                      period = 1000.0;
+                      atStart = [ join channel ] })
 
 let public saveDBAsync (sleepTime : int) =
     async {

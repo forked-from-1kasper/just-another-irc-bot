@@ -61,14 +61,14 @@ Initialize the bot:
 ```fsharp
 let myBot = IrcBot({ server = server;
                      port = port;
-                     channel = channel;
                      botNick = nick;
                      ident = ident;
                      funcs = [];
                      mode = { order = Parallel;
                               debug = false };
                      regular = [];
-                     period = 1000.0 })
+                     period = 1000.0;
+                     atStart = [ join channel ] })
 ```
 
 Add it:

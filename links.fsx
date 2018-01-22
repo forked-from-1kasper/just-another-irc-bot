@@ -98,18 +98,20 @@ let showTimeEvent =
         (time.Minute = 0 || time.Minute = 30) && (time.Second = 0)
     Event (showTime, showTimePredicat)
 
-let myBot = IrcBot({server = server;
-                    port = port;
-                    channel = channel;
-                    botNick = "NurNochMal";
-                    ident = "frei";
-                    funcs = [showLinksTitle;
-                             vote;
-                             bindAsyncFunctions [regexp; saveLastMessage];
-                             admin];
-                    mode = { order = Parallel; debug = false };
-                    regular = [showTimeEvent];
-                    period = 1000.0})
+do printf "Password: "
+
+let myBot = IrcBot({ server = server;
+                     port = port;
+                     botNick = "NurNochMal";
+                     ident = "frei";
+                     funcs = [ showLinksTitle;
+                               vote;
+                               bindAsyncFunctions [regexp; saveLastMessage];
+                               admin ];
+                     mode = { order = Parallel; debug = false };
+                     regular = [ showTimeEvent ];
+                     period = 1000.0;
+                     atStart = [ join channel ] })
 
 myBot.Cron ()
 myBot.Loop ()

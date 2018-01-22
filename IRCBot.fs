@@ -96,13 +96,13 @@ type AEvent =
 type BotDescription =
     { server : string;
       port : int;
-      channel : string;
       botNick : string;
       ident : string;
       funcs : List<(Person option * Message option) -> Message list>;
       mode : BotMode;
       regular : List<AEvent>;
-      period : float}
+      period : float;
+      atStart : List<Message> }
 
 type public IrcBot(desc) =
     let client = new TcpClient()
@@ -115,7 +115,8 @@ type public IrcBot(desc) =
     do ircWriter.WriteLine (sprintf "USER %s %s %s %s" desc.ident desc.ident
                                                        desc.ident desc.ident)
 
-    do ircWriter.WriteLine(sprintf "JOIN %s" desc.channel)
+    do (List.map messageToString desc.atStart
+        |> List.iter (writeAndPrint ircWriter))
 
     member __.Desc = desc
     member __.IrcClient = client
@@ -182,4 +183,7 @@ type ChatBuilder() =
         match v with
         | Some v' -> f v'
         | None -> []
-let chat = ChatBuilder()
+let public chat = ChatBuilder()
+
+let public join channel =
+    { command = "JOIN"; args = [ channel ] }
