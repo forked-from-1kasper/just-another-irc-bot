@@ -12,6 +12,7 @@ open System.Text.RegularExpressions
 open IRCBot
 open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
+open IRCBot.Modules
 open IRCBot.Modules.Vote
 open IRCBot.Modules.Title
 open IRCBot.Modules.Punto
@@ -129,7 +130,8 @@ let myBot = IrcBot({ server = server;
                                vote;
                                bindAsyncFunctions [regexp; saveLastMessage];
                                admin;
-                               safeJoin ];
+                               safeJoin;
+                               Sample.join ];
                      mode = { order = Parallel; debug = false };
                      regular = [ showTimeEvent ];
                      period = 1000.0;
