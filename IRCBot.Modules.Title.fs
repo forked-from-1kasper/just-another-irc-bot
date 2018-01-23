@@ -36,9 +36,6 @@ let showLinksTitle(msg) =
         |> List.map getTitle
         |> List.filter (fun x -> x.IsSome)
         |> List.map (fun x -> x.Value)
-        |> List.map (fun x ->
-                         { command = "NOTICE";
-                           args = [ channel;
-                                    sprintf ":Title: %s" x ] })
+        |> List.map (notice channel << sprintf ":Title: %s")
     | _ -> []
 

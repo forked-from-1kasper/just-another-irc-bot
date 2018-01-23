@@ -47,9 +47,7 @@ let punto(msg) =
         match text with
         | Prefix "!fix" _ ->
             if lastMessages.ContainsKey nick then
-                [{ command = "PRIVMSG";
-                   args = [ channel;
-                            sprintf ":fixed: %s" (fixLayout lastMessages.[nick]) ] }]
+                [privmsg channel <| sprintf "fixed: %s" (fixLayout lastMessages.[nick])]
             else []
         | _ -> []
     | _ -> []

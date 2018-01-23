@@ -46,7 +46,7 @@ let myBot = IrcBot ({ server = server;
                                debug = true };
                       regular = [timingEvent];
                       period = 1000.0;
-                      atStart = [ join channel ] })
+                      atStart = [ IRCBot.join channel ] })
 
 let public saveDBAsync (sleepTime : int) =
     async {

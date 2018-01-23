@@ -32,9 +32,7 @@ let public vote(msg) =
                     |> List.map (fun (vote, result) -> sprintf "«%s»: %d" vote result)
                     |> String.concat "; "
 
-                [{ command = "PRIVMSG";
-                   args = [ channel;
-                            sprintf ":%s → %s" questions.[option] toPrint ] }]
+                [notice channel <| sprintf "%s → %s" questions.[option] toPrint]
 
             | _ -> []
             
@@ -63,9 +61,7 @@ let public vote(msg) =
             | (true, option) ->
                 if (option < options.Length) &&
                    (option >= 0) then
-                    [{ command = "PRIVMSG";
-                       args = [ channel;
-                                sprintf ":%s" questions.[option] ] }]
+                    [notice channel questions.[option]]
                 else []
             | _ -> []
             
@@ -108,13 +104,10 @@ let public vote(msg) =
             let toPrint =
                 List.mapi (fun index s -> sprintf "%d: «%s»" index s) questions
                 |> String.concat "; "
-            [{ command = "PRIVMSG";
-               args = [ channel;
-                        sprintf ":%s" toPrint ]}]
+            [notice channel toPrint]
 
         | Prefix "!helpVote" _ ->
-            [{ command = "PRIVMSG";
-               args = [ channel; help ] }]
+            [notice channel help]
 
         | _ -> []
     | _ -> []

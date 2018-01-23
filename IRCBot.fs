@@ -187,3 +187,11 @@ let public chat = ChatBuilder()
 
 let public join channel =
     { command = "JOIN"; args = [ channel ] }
+
+let public notice channel message =
+    { command = "NOTICE";
+      args = [ channel; ":" + message ] }
+
+let public privmsg channel message =
+    { command = "PRIVMSG";
+      args = [ channel; ":" + message ] }

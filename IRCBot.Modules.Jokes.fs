@@ -14,9 +14,7 @@ let isGay(msg) =
                 | "timdorohin" -> "true"
                 | _ -> "false"
 
-            [{ command = "PRIVMSG";
-               args = [ channel;
-                        sprintf ":%s: %s" nick (isPidoras rest) ] }]
+            [privmsg channel <| sprintf ":%s: %s" nick (isPidoras rest)]
         | _ -> []
     | _ -> []
 
@@ -26,16 +24,10 @@ let sorry(msg) =
       Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!пожалеть" _ ->
-            [{ command = "PRIVMSG";
-               args = [ channel;
-                        sprintf ":%s: Пожалел тебе за щёку." nick ] };
-             { command = "PRIVMSG";
-               args = [ channel;
-                        sprintf ":%s: Проверяй." nick ] }]
+            [privmsg channel <| sprintf ":%s: Пожалел тебе за щёку." nick;
+             privmsg channel <| sprintf ":%s: Проверяй." nick]
         | Prefix "!лучше" _ ->
-            [{ command = "PRIVMSG";
-               args = [ channel;
-                        ":Дуднет рулит, ко‐ко‐ко" ] }]
+            [privmsg channel "Дуднет рулит, ко‐ко‐ко"]
         | _ -> []
     | _ -> []
 

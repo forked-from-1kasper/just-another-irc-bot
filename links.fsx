@@ -69,8 +69,7 @@ let regexp(msg) = chat {
             | _ -> None
         | _ -> None
 
-    return [{ command = "PRIVMSG";
-              args = [ channel; result ] }]
+    return [privmsg channel result]
 }
 
 let showHour =
@@ -111,16 +110,14 @@ let showTimeEvent =
         let time = sprintf ":Сейчас в Красноярске %s%s." showHour.[hour]
                            (showMinute minute)
     
-        [{ command = "NOTICE";
-           args = [ channel; time ] }]
+        [notice channel time]
     let showTimePredicat (time : DateTime) =
         (time.Minute = 0 || time.Minute = 30) && (time.Second = 0)
     Event (showTime, showTimePredicat)
 
 do printf "Password: "
-let sendPassword = { command = "PRIVMSG";
-                     args = [ "NickServ";
-                              sprintf ":identify %s" <| Console.ReadLine () ] }
+let sendPassword =
+    privmsg "NickServ" <| (sprintf ":identify %s" <| Console.ReadLine ())
 
 let myBot = IrcBot({ server = server;
                      port = port;
