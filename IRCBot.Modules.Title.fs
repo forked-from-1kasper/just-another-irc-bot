@@ -14,7 +14,7 @@ let getTitle (link : string) =
             |> (fun x -> x.InnerText())
             |> Some
         with
-            | _ as ex ->
+            | ex ->
                 printfn "Unhandled Exception: %s" ex.Message
                 None
 
@@ -25,6 +25,8 @@ let internal notHasNotAllowedEnd (s : string) =
     | [] -> true
     support notAllowedEnds
 let showLinksTitle(msg) =
+    let getValue (x : 'a option) = x.Value
+
     match msg with
     | _, Some { command = "PRIVMSG"; args = [channel; text] } ->
         text.Split [| ' ' |]
@@ -35,7 +37,6 @@ let showLinksTitle(msg) =
                         notHasNotAllowedEnd s)
         |> List.map getTitle
         |> List.filter (fun x -> x.IsSome)
-        |> List.map (fun x -> x.Value)
-        |> List.map (notice channel << sprintf ":Title: %s")
+        |> List.map (getValue >> sprintf "Title: %s" >> notice channel)
     | _ -> []
 

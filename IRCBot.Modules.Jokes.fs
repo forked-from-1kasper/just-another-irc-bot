@@ -4,28 +4,14 @@ open IRCBot
 open IRCBot.Public.Prefix
 open IRCBot.Public.Constants
 
-let isGay(msg) =
-    match msg with
-    | Some { nick = nick },
-      Some { command = "PRIVMSG"; args = [channel; text] } ->
-        match text with
-        | Prefix "!isGay" rest ->
-            let isPidoras = function
-                | "timdorohin" -> "true"
-                | _ -> "false"
-
-            [privmsg channel <| sprintf ":%s: %s" nick (isPidoras rest)]
-        | _ -> []
-    | _ -> []
-
 let sorry(msg) =
     match msg with
     | Some { nick = nick },
       Some { command = "PRIVMSG"; args = [channel; text] } ->
         match text with
         | Prefix "!пожалеть" _ ->
-            [privmsg channel <| sprintf ":%s: Пожалел тебе за щёку." nick;
-             privmsg channel <| sprintf ":%s: Проверяй." nick]
+            [privmsg channel <| sprintf "%s: Пожалел тебе за щёку." nick;
+             privmsg channel <| sprintf "%s: Проверяй." nick]
         | Prefix "!лучше" _ ->
             [privmsg channel "Дуднет рулит, ко‐ко‐ко"]
         | _ -> []

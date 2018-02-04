@@ -117,7 +117,7 @@ let showTimeEvent =
 
 do printf "Password: "
 let sendPassword =
-    privmsg "NickServ" <| (sprintf ":identify %s" <| Console.ReadLine ())
+    privmsg "NickServ" <| (sprintf "identify %s" <| Console.ReadLine ())
 
 let myBot = IrcBot({ server = server;
                      port = port;
@@ -128,7 +128,7 @@ let myBot = IrcBot({ server = server;
                                bindAsyncFunctions [regexp; saveLastMessage];
                                admin;
                                safeJoin;
-                               Sample.join ];
+                               Sample.joinleave ];
                      mode = { order = Parallel; debug = false };
                      regular = [ showTimeEvent ];
                      period = 1000.0;
